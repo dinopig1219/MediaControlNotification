@@ -6,14 +6,15 @@ import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.media.MediaMetadata
-import android.media.Rating
-import android.media.session.MediaController
 import android.media.session.MediaSessionManager
-import android.media.session.PlaybackState
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.RatingCompat
+import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.media.app.NotificationCompat.MediaStyle
 
@@ -26,11 +27,13 @@ class MediaControlListenerService : NotificationListenerService() {
     }
 
     private lateinit var mediaSessionManager: MediaSessionManager
-    private var activeController: MediaController? = null
+    private var activeController: MediaControllerCompat? = null
 
-    private val controllerCallback = object : MediaController.Callback() {
-        override fun onPlaybackStateChanged(state: PlaybackState?) = updateNotification()
-        override fun onMetadataChanged(metadata: MediaMetadata?) = updateNotification()
+    private val controllerCallback = object : MediaControllerCompat.Callback() {
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) = updateNotification()
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) = updateNotification()
+        override fun onRepeatModeChanged(repeatMode: Int) = updateNotification()
+        override fun onShuffleModeChanged(shuffleMode: Int) = updateNotification()
         override fun onSessionDestroyed() {
             activeController = null
             cancelNotification()
@@ -64,11 +67,13 @@ class MediaControlListenerService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {}
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {}
 
-    private fun pickController(controllers: List<MediaController>?) {
+    private fun pickController(controllers: List<android.media.session.MediaController>?) {
         activeController?.unregisterCallback(controllerCallback)
         val target = controllers?.firstOrNull { it.packageName in TARGET_PACKAGES }
-        activeController = target
-        target?.registerCallback(controllerCallback)
+        activeController = target?.let {
+            MediaControllerCompat(this, MediaSessionCompat.Token.fromToken(it.sessionToken))
+        }
+        activeController?.registerCallback(controllerCallback)
         updateNotification()
     }
 
@@ -76,27 +81,26 @@ class MediaControlListenerService : NotificationListenerService() {
         val controller = activeController
         val state = controller?.playbackState
 
-        if (controller == null || state == null || state.state == PlaybackState.STATE_NONE) {
+        if (controller == null || state == null || state.state == PlaybackStateCompat.STATE_NONE) {
             cancelNotification()
             return
         }
 
         val metadata = controller.metadata
-        val isPlaying = state.state == PlaybackState.STATE_PLAYING
+        val isPlaying = state.state == PlaybackStateCompat.STATE_PLAYING
         val actionsBitmask = state.actions
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_media_play)
-            .setContentTitle(metadata?.getString(MediaMetadata.METADATA_KEY_TITLE) ?: "正在播放")
-            .setContentText(metadata?.getString(MediaMetadata.METADATA_KEY_ARTIST) ?: "")
+            .setContentTitle(metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "正在播放")
+            .setContentText(metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "")
             .setOngoing(isPlaying)
             .setOnlyAlertOnce(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
 
-        metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)?.let { builder.setLargeIcon(it) }
+        metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)?.let { builder.setLargeIcon(it) }
 
-        // 标准三键
         builder.addAction(standardAction(android.R.drawable.ic_media_previous, "上一首", MediaActionReceiver.ACTION_SKIP_PREV))
         builder.addAction(
             if (isPlaying) standardAction(android.R.drawable.ic_media_pause, "暂停", MediaActionReceiver.ACTION_PAUSE)
@@ -104,19 +108,17 @@ class MediaControlListenerService : NotificationListenerService() {
         )
         builder.addAction(standardAction(android.R.drawable.ic_media_next, "下一首", MediaActionReceiver.ACTION_SKIP_NEXT))
 
-        // 循环：Spotify 是走 ACTION_SET_REPEAT_MODE，不是 custom action
-        if (actionsBitmask and PlaybackState.ACTION_SET_REPEAT_MODE != 0L) {
+        if (actionsBitmask and PlaybackStateCompat.ACTION_SET_REPEAT_MODE != 0L) {
             val label = when (controller.repeatMode) {
-                PlaybackState.REPEAT_MODE_ONE -> "循环: 单曲"
-                PlaybackState.REPEAT_MODE_ALL, PlaybackState.REPEAT_MODE_GROUP -> "循环: 全部"
+                PlaybackStateCompat.REPEAT_MODE_ONE -> "循环: 单曲"
+                PlaybackStateCompat.REPEAT_MODE_ALL, PlaybackStateCompat.REPEAT_MODE_GROUP -> "循环: 全部"
                 else -> "循环: 关闭"
             }
             builder.addAction(standardAction(android.R.drawable.ic_popup_sync, label, MediaActionReceiver.ACTION_TOGGLE_REPEAT))
         }
 
-        // 随机播放
-        if (actionsBitmask and PlaybackState.ACTION_SET_SHUFFLE_MODE != 0L) {
-            val shuffleOn = controller.shuffleMode != PlaybackState.SHUFFLE_MODE_NONE
+        if (actionsBitmask and PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE != 0L) {
+            val shuffleOn = controller.shuffleMode != PlaybackStateCompat.SHUFFLE_MODE_NONE
             builder.addAction(
                 standardAction(
                     android.R.drawable.ic_popup_sync,
@@ -126,12 +128,11 @@ class MediaControlListenerService : NotificationListenerService() {
             )
         }
 
-        // like：Spotify 走 ACTION_SET_RATING + Rating 对象，不是 custom action
-        if (actionsBitmask and PlaybackState.ACTION_SET_RATING != 0L) {
-            val currentRating = metadata?.getRating(MediaMetadata.METADATA_KEY_USER_RATING)
+        if (actionsBitmask and PlaybackStateCompat.ACTION_SET_RATING != 0L) {
+            val currentRating = metadata?.getRating(MediaMetadataCompat.METADATA_KEY_USER_RATING)
             val loved = when (controller.ratingType) {
-                Rating.RATING_HEART -> currentRating?.hasHeart() == true
-                Rating.RATING_THUMB_UP_DOWN -> currentRating?.isRated == true && currentRating.isThumbUp
+                RatingCompat.RATING_HEART -> currentRating?.hasHeart() == true
+                RatingCompat.RATING_THUMB_UP_DOWN -> currentRating?.isRated == true && currentRating.isThumbUp
                 else -> false
             }
             builder.addAction(
@@ -143,7 +144,6 @@ class MediaControlListenerService : NotificationListenerService() {
             )
         }
 
-        // 保留：以防其它 App 是走 custom actions 这条路
         state.customActions?.forEach { builder.addAction(customAction(it)) }
 
         builder.setStyle(MediaStyle().setShowActionsInCompactView(0, 1, 2))
@@ -160,7 +160,7 @@ class MediaControlListenerService : NotificationListenerService() {
         return NotificationCompat.Action.Builder(icon, title, pi).build()
     }
 
-    private fun customAction(customAction: PlaybackState.CustomAction): NotificationCompat.Action {
+    private fun customAction(customAction: PlaybackStateCompat.CustomAction): NotificationCompat.Action {
         val intent = Intent(this, MediaActionReceiver::class.java).apply {
             action = MediaActionReceiver.ACTION_CUSTOM
             putExtra(MediaActionReceiver.EXTRA_CUSTOM_ACTION, customAction.action)
@@ -169,7 +169,7 @@ class MediaControlListenerService : NotificationListenerService() {
             this, customAction.action.hashCode(), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        return NotificationCompat.Action.Builder(customAction.icon, customAction.name, pi).build()
+        return NotificationCompat.Action.Builder(customAction.icon, customAction.name.toString(), pi).build()
     }
 
     private fun cancelNotification() {

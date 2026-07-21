@@ -24,7 +24,6 @@ class MediaControlListenerService : NotificationListenerService() {
         const val CHANNEL_ID = "media_control_patch"
         const val NOTIFICATION_ID = 9001
         const val DEBUG_NOTIFICATION_ID = 9002
-        const val DEBUG_MODE = true // 确认没问题之后可以改成 false
         val TARGET_PACKAGES = setOf("com.spotify.music")
     }
 
@@ -109,8 +108,8 @@ class MediaControlListenerService : NotificationListenerService() {
         )
         builder.addAction(standardAction(android.R.drawable.ic_media_next, "下一首", MediaActionReceiver.ACTION_SKIP_NEXT))
 
-        // 关键改动：不再自己猜状态，直接把 Spotify 给的 custom actions（含它自己的图标）原样渲染出来。
-        // 这些 action 会随着 Spotify 内部状态自动换名字/换图标（比如 shuffle 关→开→智能 shuffle）。
+        // 直接把 Spotify 自己给的 custom actions（含它自己的图标）原样渲染出来，
+        // 状态由 Spotify 自己维护，我们不猜测、不自己画状态。
         state.customActions?.forEach { builder.addAction(customAction(it)) }
 
         val customCount = state.customActions?.size ?: 0
@@ -119,10 +118,20 @@ class MediaControlListenerService : NotificationListenerService() {
 
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, builder.build())
 
-        if (DEBUG_MODE) showDebugNotification(state, controller)
+        // 完整调试信息一直存起来，App 里的 DebugActivity 随时能看到最新的
+        saveDebugInfo(state)
+
+        // 调试通知本身要不要发，看用户在 App 里那个开关
+        val debugNotificationsOn = getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+            .getBoolean("debug_notifications_enabled", false)
+        if (debugNotificationsOn) {
+            showDebugNotification(state)
+        } else {
+            getSystemService(NotificationManager::class.java).cancel(DEBUG_NOTIFICATION_ID)
+        }
     }
 
-    private fun showDebugNotification(state: PlaybackStateCompat, controller: MediaControllerCompat) {
+    private fun buildDebugText(state: PlaybackStateCompat): String {
         val sb = StringBuilder()
         sb.append("更新时间: ${java.text.SimpleDateFormat("HH:mm:ss").format(java.util.Date())}\n\n")
         sb.append("包名: $activePackageName\n")
@@ -135,11 +144,25 @@ class MediaControlListenerService : NotificationListenerService() {
                 sb.append("  name=${it.name}\n  action=${it.action}\n  icon=${it.icon}\n\n")
             }
         }
+        return sb.toString()
+    }
 
+    private fun saveDebugInfo(state: PlaybackStateCompat) {
         getSharedPreferences("debug_info", Context.MODE_PRIVATE)
             .edit()
-            .putString("last_debug_info", sb.toString())
+            .putString("last_debug_info", buildDebugText(state))
             .apply()
+    }
+
+    private fun showDebugNotification(state: PlaybackStateCompat) {
+        val debugBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("调试信息（点开看完整）")
+            .setStyle(NotificationCompat.BigTextStyle().bigText(buildDebugText(state)))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOnlyAlertOnce(true)
+
+        getSystemService(NotificationManager::class.java).notify(DEBUG_NOTIFICATION_ID, debugBuilder.build())
     }
 
     private fun standardAction(icon: Int, title: String, action: String): NotificationCompat.Action {
@@ -151,7 +174,6 @@ class MediaControlListenerService : NotificationListenerService() {
         return NotificationCompat.Action.Builder(icon, title, pi).build()
     }
 
-    // 核心修正：图标用 IconCompat 跨包读取 Spotify 自己的资源，而不是当成我们自己 App 的资源去找
     private fun customAction(customAction: PlaybackStateCompat.CustomAction): NotificationCompat.Action {
         val intent = Intent(this, MediaActionReceiver::class.java).apply {
             action = MediaActionReceiver.ACTION_CUSTOM

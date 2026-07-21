@@ -19,6 +19,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".DebugActivity"
+            android:exported="false"
+            android:label="调试信息" />
+
         <!--
             这是核心：NotificationListenerService。
             用户需要在 系统设置 -> 通知使用权 里手动给这个 App 授权，
@@ -39,4 +44,3 @@
             android:exported="false" />
 
     </application>
-</manifest>

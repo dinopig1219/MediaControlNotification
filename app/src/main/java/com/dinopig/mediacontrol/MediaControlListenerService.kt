@@ -23,6 +23,8 @@ class MediaControlListenerService : NotificationListenerService() {
     companion object {
         const val CHANNEL_ID = "media_control_patch"
         const val NOTIFICATION_ID = 9001
+        const val DEBUG_NOTIFICATION_ID = 9002
+        const val DEBUG_MODE = true // 先开着看原始数据，确认 Smart Shuffle 怎么暴露之后可以关掉
         val TARGET_PACKAGES = setOf("com.spotify.music")
     }
 
@@ -114,14 +116,14 @@ class MediaControlListenerService : NotificationListenerService() {
                 PlaybackStateCompat.REPEAT_MODE_ALL, PlaybackStateCompat.REPEAT_MODE_GROUP -> "循环: 全部"
                 else -> "循环: 关闭"
             }
-            builder.addAction(standardAction(android.R.drawable.ic_popup_sync, label, MediaActionReceiver.ACTION_TOGGLE_REPEAT))
+            builder.addAction(standardAction(R.drawable.ic_repeat, label, MediaActionReceiver.ACTION_TOGGLE_REPEAT))
         }
 
         if (actionsBitmask and PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE != 0L) {
             val shuffleOn = controller.shuffleMode != PlaybackStateCompat.SHUFFLE_MODE_NONE
             builder.addAction(
                 standardAction(
-                    android.R.drawable.ic_popup_sync,
+                    R.drawable.ic_shuffle,
                     if (shuffleOn) "随机: 开" else "随机: 关",
                     MediaActionReceiver.ACTION_TOGGLE_SHUFFLE
                 )
@@ -137,7 +139,7 @@ class MediaControlListenerService : NotificationListenerService() {
             }
             builder.addAction(
                 standardAction(
-                    if (loved) android.R.drawable.btn_star_big_on else android.R.drawable.btn_star_big_off,
+                    if (loved) R.drawable.ic_like_filled else R.drawable.ic_like_outline,
                     if (loved) "已喜欢" else "喜欢",
                     MediaActionReceiver.ACTION_TOGGLE_LIKE
                 )
@@ -149,6 +151,34 @@ class MediaControlListenerService : NotificationListenerService() {
         builder.setStyle(MediaStyle().setShowActionsInCompactView(0, 1, 2))
 
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, builder.build())
+
+        if (DEBUG_MODE) showDebugNotification(state, controller)
+    }
+
+    // 只是给你看原始数据用的，跟功能无关，之后确定 Smart Shuffle 的字段后可以整段删掉
+    private fun showDebugNotification(state: PlaybackStateCompat, controller: MediaControllerCompat) {
+        val sb = StringBuilder()
+        sb.append("actions bitmask: ${state.actions}\n")
+        sb.append("repeatMode: ${controller.repeatMode}\n")
+        sb.append("shuffleMode: ${controller.shuffleMode}\n")
+        sb.append("ratingType: ${controller.ratingType}\n")
+        sb.append("customActions:\n")
+        if (state.customActions.isNullOrEmpty()) {
+            sb.append("  (无)\n")
+        } else {
+            state.customActions.forEach {
+                sb.append("  name=${it.name} action=${it.action} icon=${it.icon}\n")
+            }
+        }
+
+        val debugBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("调试信息（点开看完整）")
+            .setStyle(NotificationCompat.BigTextStyle().bigText(sb.toString()))
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOnlyAlertOnce(true)
+
+        getSystemService(NotificationManager::class.java).notify(DEBUG_NOTIFICATION_ID, debugBuilder.build())
     }
 
     private fun standardAction(icon: Int, title: String, action: String): NotificationCompat.Action {
@@ -174,6 +204,7 @@ class MediaControlListenerService : NotificationListenerService() {
 
     private fun cancelNotification() {
         getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
+        getSystemService(NotificationManager::class.java).cancel(DEBUG_NOTIFICATION_ID)
     }
 
     private fun createChannel() {

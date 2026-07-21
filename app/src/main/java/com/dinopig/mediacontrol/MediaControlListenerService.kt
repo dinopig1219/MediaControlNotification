@@ -101,12 +101,12 @@ class MediaControlListenerService : NotificationListenerService() {
 
         metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)?.let { builder.setLargeIcon(it) }
 
-        builder.addAction(standardAction(android.R.drawable.ic_media_previous, "上一首", MediaActionReceiver.ACTION_SKIP_PREV))
+        builder.addAction(standardAction(R.drawable.ic_thin_previous, "上一首", MediaActionReceiver.ACTION_SKIP_PREV))
         builder.addAction(
-            if (isPlaying) standardAction(android.R.drawable.ic_media_pause, "暂停", MediaActionReceiver.ACTION_PAUSE)
-            else standardAction(android.R.drawable.ic_media_play, "播放", MediaActionReceiver.ACTION_PLAY)
+            if (isPlaying) standardAction(R.drawable.ic_thin_pause, "暂停", MediaActionReceiver.ACTION_PAUSE)
+            else standardAction(R.drawable.ic_thin_play, "播放", MediaActionReceiver.ACTION_PLAY)
         )
-        builder.addAction(standardAction(android.R.drawable.ic_media_next, "下一首", MediaActionReceiver.ACTION_SKIP_NEXT))
+        builder.addAction(standardAction(R.drawable.ic_thin_next, "下一首", MediaActionReceiver.ACTION_SKIP_NEXT))
 
         // 直接把 Spotify 自己给的 custom actions（含它自己的图标）原样渲染出来，
         // 状态由 Spotify 自己维护，我们不猜测、不自己画状态。

@@ -11,11 +11,11 @@ import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.support.v4.media.MediaMetadataCompat
-import android.support.v4.media.RatingCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.media.app.NotificationCompat.MediaStyle
 
 class MediaControlListenerService : NotificationListenerService() {
@@ -24,18 +24,17 @@ class MediaControlListenerService : NotificationListenerService() {
         const val CHANNEL_ID = "media_control_patch"
         const val NOTIFICATION_ID = 9001
         const val DEBUG_NOTIFICATION_ID = 9002
-        const val DEBUG_MODE = true // 先开着看原始数据，确认 Smart Shuffle 怎么暴露之后可以关掉
+        const val DEBUG_MODE = true // 确认没问题之后可以改成 false
         val TARGET_PACKAGES = setOf("com.spotify.music")
     }
 
     private lateinit var mediaSessionManager: MediaSessionManager
     private var activeController: MediaControllerCompat? = null
+    private var activePackageName: String = ""
 
     private val controllerCallback = object : MediaControllerCompat.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) = updateNotification()
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) = updateNotification()
-        override fun onRepeatModeChanged(repeatMode: Int) = updateNotification()
-        override fun onShuffleModeChanged(shuffleMode: Int) = updateNotification()
         override fun onSessionDestroyed() {
             activeController = null
             cancelNotification()
@@ -72,6 +71,7 @@ class MediaControlListenerService : NotificationListenerService() {
     private fun pickController(controllers: List<android.media.session.MediaController>?) {
         activeController?.unregisterCallback(controllerCallback)
         val target = controllers?.firstOrNull { it.packageName in TARGET_PACKAGES }
+        activePackageName = target?.packageName ?: ""
         activeController = target?.let {
             MediaControllerCompat(this, MediaSessionCompat.Token.fromToken(it.sessionToken))
         }
@@ -90,7 +90,6 @@ class MediaControlListenerService : NotificationListenerService() {
 
         val metadata = controller.metadata
         val isPlaying = state.state == PlaybackStateCompat.STATE_PLAYING
-        val actionsBitmask = state.actions
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_media_play)
@@ -110,58 +109,22 @@ class MediaControlListenerService : NotificationListenerService() {
         )
         builder.addAction(standardAction(android.R.drawable.ic_media_next, "下一首", MediaActionReceiver.ACTION_SKIP_NEXT))
 
-        if (actionsBitmask and PlaybackStateCompat.ACTION_SET_REPEAT_MODE != 0L) {
-            val label = when (controller.repeatMode) {
-                PlaybackStateCompat.REPEAT_MODE_ONE -> "循环: 单曲"
-                PlaybackStateCompat.REPEAT_MODE_ALL, PlaybackStateCompat.REPEAT_MODE_GROUP -> "循环: 全部"
-                else -> "循环: 关闭"
-            }
-            builder.addAction(standardAction(R.drawable.ic_repeat, label, MediaActionReceiver.ACTION_TOGGLE_REPEAT))
-        }
-
-        if (actionsBitmask and PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE != 0L) {
-            val shuffleOn = controller.shuffleMode != PlaybackStateCompat.SHUFFLE_MODE_NONE
-            builder.addAction(
-                standardAction(
-                    R.drawable.ic_shuffle,
-                    if (shuffleOn) "随机: 开" else "随机: 关",
-                    MediaActionReceiver.ACTION_TOGGLE_SHUFFLE
-                )
-            )
-        }
-
-        if (actionsBitmask and PlaybackStateCompat.ACTION_SET_RATING != 0L) {
-            val currentRating = metadata?.getRating(MediaMetadataCompat.METADATA_KEY_USER_RATING)
-            val loved = when (controller.ratingType) {
-                RatingCompat.RATING_HEART -> currentRating?.hasHeart() == true
-                RatingCompat.RATING_THUMB_UP_DOWN -> currentRating?.isRated == true && currentRating.isThumbUp
-                else -> false
-            }
-            builder.addAction(
-                standardAction(
-                    if (loved) R.drawable.ic_like_filled else R.drawable.ic_like_outline,
-                    if (loved) "已喜欢" else "喜欢",
-                    MediaActionReceiver.ACTION_TOGGLE_LIKE
-                )
-            )
-        }
-
+        // 关键改动：不再自己猜状态，直接把 Spotify 给的 custom actions（含它自己的图标）原样渲染出来。
+        // 这些 action 会随着 Spotify 内部状态自动换名字/换图标（比如 shuffle 关→开→智能 shuffle）。
         state.customActions?.forEach { builder.addAction(customAction(it)) }
 
-        builder.setStyle(MediaStyle().setShowActionsInCompactView(0, 1, 2))
+        val customCount = state.customActions?.size ?: 0
+        val compactIndices = (0 until minOf(3, 3 + customCount)).toList().take(3).toIntArray()
+        builder.setStyle(MediaStyle().setShowActionsInCompactView(*compactIndices))
 
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, builder.build())
 
         if (DEBUG_MODE) showDebugNotification(state, controller)
     }
 
-    // 只是给你看原始数据用的，跟功能无关，之后确定 Smart Shuffle 的字段后可以整段删掉
     private fun showDebugNotification(state: PlaybackStateCompat, controller: MediaControllerCompat) {
         val sb = StringBuilder()
         sb.append("actions bitmask: ${state.actions}\n")
-        sb.append("repeatMode: ${controller.repeatMode}\n")
-        sb.append("shuffleMode: ${controller.shuffleMode}\n")
-        sb.append("ratingType: ${controller.ratingType}\n")
         sb.append("customActions:\n")
         if (state.customActions.isNullOrEmpty()) {
             sb.append("  (无)\n")
@@ -190,6 +153,7 @@ class MediaControlListenerService : NotificationListenerService() {
         return NotificationCompat.Action.Builder(icon, title, pi).build()
     }
 
+    // 核心修正：图标用 IconCompat 跨包读取 Spotify 自己的资源，而不是当成我们自己 App 的资源去找
     private fun customAction(customAction: PlaybackStateCompat.CustomAction): NotificationCompat.Action {
         val intent = Intent(this, MediaActionReceiver::class.java).apply {
             action = MediaActionReceiver.ACTION_CUSTOM
@@ -199,7 +163,12 @@ class MediaControlListenerService : NotificationListenerService() {
             this, customAction.action.hashCode(), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        return NotificationCompat.Action.Builder(customAction.icon, customAction.name.toString(), pi).build()
+        val icon = try {
+            IconCompat.createWithResource(this, activePackageName, customAction.icon)
+        } catch (e: Exception) {
+            IconCompat.createWithResource(this, packageName, android.R.drawable.ic_menu_help)
+        }
+        return NotificationCompat.Action.Builder(icon, customAction.name.toString(), pi).build()
     }
 
     private fun cancelNotification() {

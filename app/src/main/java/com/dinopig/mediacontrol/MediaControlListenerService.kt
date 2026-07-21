@@ -164,7 +164,8 @@ class MediaControlListenerService : NotificationListenerService() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val icon = try {
-            IconCompat.createWithResource(this, activePackageName, customAction.icon)
+            val remoteResources = packageManager.getResourcesForApplication(activePackageName)
+            IconCompat.createWithResource(remoteResources, activePackageName, customAction.icon)
         } catch (e: Exception) {
             IconCompat.createWithResource(this, packageName, android.R.drawable.ic_menu_help)
         }

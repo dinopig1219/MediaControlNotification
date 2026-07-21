@@ -24,11 +24,6 @@
             android:exported="false"
             android:label="调试信息" />
 
-        <!--
-            这是核心：NotificationListenerService。
-            用户需要在 系统设置 -> 通知使用权 里手动给这个 App 授权，
-            授权后本 App 才能读取其它 App(如 Spotify) 的 MediaSession。
-        -->
         <service
             android:name=".MediaControlListenerService"
             android:label="媒体控制补丁"
@@ -44,3 +39,4 @@
             android:exported="false" />
 
     </application>
+</manifest>

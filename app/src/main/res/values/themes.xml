@@ -1,1 +1,3 @@
-
+<resources>
+    <style name="Theme.MediaControlPatch" parent="Theme.AppCompat.Light.NoActionBar" />
+</resources>

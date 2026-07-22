@@ -32,10 +32,12 @@ class DebugActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val controller = remember { ThemeController(ColorSchemeMode.System) }
-            MiuixTheme(controller = controller) {
+            MiuixTheme(
+                colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+            ) {
                 DebugScreen()
             }
+        }
         }
     }
 }

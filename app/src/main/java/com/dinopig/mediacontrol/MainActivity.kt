@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -86,13 +85,13 @@ private fun RootScreen() {
                     BottomTabItem(
                         label = "主页",
                         selected = selectedTab == 0,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(0.5f),
                         onClick = { selectedTab = 0 }
                     )
                     BottomTabItem(
                         label = "关于",
                         selected = selectedTab == 1,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.fillMaxWidth(1f),
                         onClick = { selectedTab = 1 }
                     )
                 }

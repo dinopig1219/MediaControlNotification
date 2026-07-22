@@ -69,13 +69,14 @@ jobs:
           RAW_MESSAGE="${COMMIT_MESSAGE:-Manual trigger}"
           AUTHOR="${COMMIT_AUTHOR:-${{ github.actor }}}"
 
-          SAFE_MESSAGE=$(printf '%s' "$RAW_MESSAGE" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
+          # 代码块里不能再出现反引号，先去掉，避免把 Markdown 格式弄坏
+          SAFE_MESSAGE=$(printf '%s' "$RAW_MESSAGE" | tr -d '`')
 
-          CAPTION=$(printf 'New push to GitHub\n<b>Branch:</b>\n<code>%s</code>\n\n<b>Commits:</b>\n<code>%s</code>\n\nby %s\n\n<a href="%s">Commit</a>' \
+          CAPTION=$(printf 'New push to GitHub\n\x60\x60\x60Branch:\n%s\x60\x60\x60\n\n\x60\x60\x60Commits:\n%s\x60\x60\x60\n\nby %s\n\n[Commit](%s)' \
             "$BRANCH_NAME" "$SAFE_MESSAGE" "$AUTHOR" "$COMMIT_URL")
 
           curl -F "chat_id=${TELEGRAM_CHAT_ID}" \
                -F "document=@${APK_PATH}" \
-               -F "parse_mode=HTML" \
+               -F "parse_mode=Markdown" \
                -F "caption=${CAPTION}" \
                "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendDocument"

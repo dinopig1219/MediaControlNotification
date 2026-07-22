@@ -50,7 +50,7 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          CAPTION=$(printf '媒体控制补丁 release build (%s)\nCommit: %s' "$(date +'%Y-%m-%d %H:%M')" "${{ github.sha }}")
+          CAPTION=$(printf '媒体控制通知 release build (%s)\nCommit: %s' "$(date +'%Y-%m-%d %H:%M')" "${{ github.sha }}")
           curl -F "chat_id=${TELEGRAM_CHAT_ID}" \
                -F "document=@app/build/outputs/apk/release/app-release.apk" \
                -F "caption=${CAPTION}" \

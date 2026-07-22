@@ -7,6 +7,7 @@ on:
 
 jobs:
   build:
+    name: Build App
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,6 +46,7 @@ jobs:
           path: app/build/outputs/apk/release/*.apk
 
   notify_telegram:
+    name: Push to Telegram Channel
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -69,7 +71,7 @@ jobs:
 
           SAFE_MESSAGE=$(printf '%s' "$RAW_MESSAGE" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g')
 
-          CAPTION=$(printf 'New push to GitHub\nBranch:\n<code>%s</code>\n\nCommits:\n%s\n\nCommit by: %s\n\n<a href="%s">Commit</a>' \
+          CAPTION=$(printf 'New push to GitHub\n<b>Branch:</b>\n<code>%s</code>\n\n<b>Commits:</b>\n<code>%s</code>\n\nby %s\n\n<a href="%s">Commit</a>' \
             "$BRANCH_NAME" "$SAFE_MESSAGE" "$AUTHOR" "$COMMIT_URL")
 
           curl -F "chat_id=${TELEGRAM_CHAT_ID}" \

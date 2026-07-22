@@ -12,6 +12,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,16 +38,17 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.preference.SwitchPreference
-import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeController
+import top.yukonga.miuix.kmp.theme.darkColorScheme
+import top.yukonga.miuix.kmp.theme.lightColorScheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val controller = remember { ThemeController(ColorSchemeMode.System) }
-            MiuixTheme(controller = controller) {
+            MiuixTheme(
+                colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+            ) {
                 MainScreen()
             }
         }
@@ -75,7 +77,6 @@ private fun MainScreen() {
         ActivityResultContracts.RequestPermission()
     ) { granted -> notificationGranted = granted }
 
-    // App 从设置页返回时，重新检查一次权限的真实状态
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -93,10 +94,14 @@ private fun MainScreen() {
                 .fillMaxSize()
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 12.dp),
+                .padding(horizontal = 20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(text = "媒体控制补丁", style = MiuixTheme.textStyles.title3)
+            Text(
+                text = "媒体控制补丁",
+                style = MiuixTheme.textStyles.title1,
+                modifier = Modifier.padding(top = 32.dp, bottom = 4.dp)
+            )
 
             SwitchPreference(
                 title = "服务总开关",
@@ -129,7 +134,6 @@ private fun MainScreen() {
                             notificationGranted = true
                         }
                     } else {
-                        // Android 不允许 App 自己收回已授予的权限，跳到系统设置页让用户手动关闭
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
                             data = Uri.fromParts("package", context.packageName, null)
                         }

@@ -102,9 +102,9 @@ private fun RootScreen() {
     Scaffold(
         topBar = {
             if (pagerState.currentPage == 0) {
-                TopAppBar(title = "媒体控制通知", scrollBehavior = homeScrollBehavior)
+                TopAppBar(title = "媒体控制通知")
             } else {
-                TopAppBar(title = "关于", scrollBehavior = aboutScrollBehavior)
+                TopAppBar(title = "关于")
             }
         },
         bottomBar = {

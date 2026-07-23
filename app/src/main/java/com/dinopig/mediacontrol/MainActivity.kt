@@ -12,6 +12,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -34,15 +36,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -75,6 +80,10 @@ private fun isNotificationPermissionGranted(context: Context): Boolean {
     ) == PackageManager.PERMISSION_GRANTED
 }
 
+private fun isNotificationListenerEnabled(context: Context): Boolean {
+    return NotificationManagerCompat.getEnabledListenerPackages(context).contains(context.packageName)
+}
+
 private fun openAppDetailsSettings(context: Context) {
     val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
         data = Uri.fromParts("package", context.packageName, null)
@@ -87,12 +96,15 @@ private fun RootScreen() {
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
 
+    val homeScrollBehavior = MiuixScrollBehavior()
+    val aboutScrollBehavior = MiuixScrollBehavior()
+
     Scaffold(
         topBar = {
             if (pagerState.currentPage == 0) {
-                TopAppBar(title = "媒体控制通知")
+                TopAppBar(title = "媒体控制通知", scrollBehavior = homeScrollBehavior)
             } else {
-                TopAppBar(title = "关于")
+                TopAppBar(title = "关于", scrollBehavior = aboutScrollBehavior)
             }
         },
         bottomBar = {
@@ -116,22 +128,27 @@ private fun RootScreen() {
             state = pagerState,
             modifier = Modifier.fillMaxSize().padding(padding)
         ) { page ->
-            if (page == 0) HomeScreen() else AboutScreen()
+            if (page == 0) HomeScreen(homeScrollBehavior) else AboutScreen(aboutScrollBehavior)
         }
     }
 }
 
 @Composable
-private fun HomeScreen() {
+private fun HomeScreen(scrollBehavior: MiuixScrollBehavior) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
 
     var notificationGranted by remember { mutableStateOf(isNotificationPermissionGranted(context)) }
+    var listenerEnabled by remember { mutableStateOf(isNotificationListenerEnabled(context)) }
     var notificationAskedBefore by remember {
         mutableStateOf(prefs.getBoolean("notification_permission_asked", false))
     }
     var masterEnabled by remember {
-        mutableStateOf(prefs.getBoolean("master_enabled", false) && isNotificationPermissionGranted(context))
+        mutableStateOf(
+            prefs.getBoolean("master_enabled", false) &&
+                isNotificationPermissionGranted(context) &&
+                isNotificationListenerEnabled(context)
+        )
     }
     var debugNotificationsOn by remember {
         mutableStateOf(prefs.getBoolean("debug_notifications_enabled", false))
@@ -146,7 +163,8 @@ private fun HomeScreen() {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 notificationGranted = isNotificationPermissionGranted(context)
-                if (!notificationGranted && masterEnabled) {
+                listenerEnabled = isNotificationListenerEnabled(context)
+                if ((!notificationGranted || !listenerEnabled) && masterEnabled) {
                     masterEnabled = false
                     prefs.edit().putBoolean("master_enabled", false).apply()
                 }
@@ -159,6 +177,7 @@ private fun HomeScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -167,21 +186,24 @@ private fun HomeScreen() {
             SwitchPreference(
                 title = "服务总开关",
                 summary = when {
-                    !notificationGranted -> "需要先开启「通知权限」才能启用"
+                    !notificationGranted || !listenerEnabled -> "需要先开启下面两项权限才能启用"
                     masterEnabled -> "正在运行，Spotify 播放时会生成通知"
                     else -> "已关闭，不会生成任何通知"
                 },
                 checked = masterEnabled,
                 onCheckedChange = { checked ->
-                    if (checked && !notificationGranted) {
-                        if (!notificationAskedBefore) {
-                            notificationAskedBefore = true
-                            prefs.edit().putBoolean("notification_permission_asked", true).apply()
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    if (checked && (!notificationGranted || !listenerEnabled)) {
+                        when {
+                            !notificationGranted -> {
+                                notificationAskedBefore = true
+                                prefs.edit().putBoolean("notification_permission_asked", true).apply()
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
                             }
-                        } else {
-                            openAppDetailsSettings(context)
+                            !listenerEnabled -> {
+                                context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                            }
                         }
                     } else {
                         masterEnabled = checked
@@ -191,16 +213,31 @@ private fun HomeScreen() {
             )
         }
 
-        Card(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
-            Text(
-                text = "第 1 步：授予「通知权限」\n\n第 2 步：授予「通知使用权」\n\n" +
-                    "授权后，本 App 会读取 Spotify 当前的播放状态，并在通知栏里重新生成一条带完整按钮的通知。\n\n" +
-                    "第 3 步：把本 App 加入省电策略白名单 / 允许自启动，否则 HyperOS 可能会在后台把它杀掉。",
-                modifier = Modifier.padding(16.dp)
-            )
+        SmallTitle(text = "通知")
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        MiuixTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "使用前请授权以下两项，缺一不可：\n" +
+                        "「通知权限」用于本 App 生成通知；\n" +
+                        "「通知使用权」用于读取 Spotify 的播放状态。",
+                    color = MiuixTheme.colorScheme.primary
+                )
+            }
         }
 
-        SmallTitle(text = "通知")
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
             Column {
                 SwitchPreference(
@@ -222,10 +259,13 @@ private fun HomeScreen() {
                     }
                 )
 
-                TextButton(
-                    text = "打开通知使用权设置",
-                    onClick = { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                SwitchPreference(
+                    title = "通知使用权",
+                    summary = if (listenerEnabled) "已授权" else "未授权，点击开启",
+                    checked = listenerEnabled,
+                    onCheckedChange = {
+                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                    }
                 )
             }
         }
@@ -254,7 +294,7 @@ private fun HomeScreen() {
 }
 
 @Composable
-private fun AboutScreen() {
+private fun AboutScreen(scrollBehavior: MiuixScrollBehavior) {
     val context = LocalContext.current
     val packageInfo = remember {
         context.packageManager.getPackageInfo(context.packageName, 0)
@@ -265,11 +305,11 @@ private fun AboutScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp),
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Card(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(text = "媒体控制通知", style = MiuixTheme.textStyles.title3)
                 Text(text = "版本 $versionName ($versionCode)")

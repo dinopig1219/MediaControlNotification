@@ -18,9 +18,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.nestedscroll.nestedScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -37,19 +39,16 @@ import androidx.core.content.pm.PackageInfoCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import top.yukonga.miuix.kmp.basic.Card
-import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.basic.rememberTopAppBarState
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
+import top.yukonga.miuix.kmp.preference.SwitchPreference
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,52 +81,35 @@ private fun openAppDetailsSettings(context: Context) {
 private fun RootScreen() {
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    val homeScrollBehavior = MiuixScrollBehavior(state = rememberTopAppBarState())
-    val aboutScrollBehavior = MiuixScrollBehavior(state = rememberTopAppBarState())
-
     Scaffold(
         topBar = {
-            if (selectedTab == 0) {
-                TopAppBar(
-                    title = "媒体控制通知",
-                    scrollBehavior = homeScrollBehavior
-                )
-            } else {
-                TopAppBar(
-                    title = "关于",
-                    scrollBehavior = aboutScrollBehavior
-                )
-            }
+            TopAppBar(title = if (selectedTab == 0) "媒体控制通知" else "关于")
         },
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    icon = MiuixIcons.VerticalSplit,
+                    icon = Icons.Default.Home,
                     label = "主页"
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = { selectedTab = 1 },
-                    icon = MiuixIcons.Info,
+                    icon = Icons.Default.Info,
                     label = "关于"
                 )
             }
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            if (selectedTab == 0) {
-                HomeScreen(homeScrollBehavior)
-            } else {
-                AboutScreen(aboutScrollBehavior)
-            }
+            if (selectedTab == 0) HomeScreen() else AboutScreen()
         }
     }
 }
 
 @Composable
-private fun HomeScreen(scrollBehavior: MiuixScrollBehavior) {
+private fun HomeScreen() {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
 
@@ -164,7 +146,6 @@ private fun HomeScreen(scrollBehavior: MiuixScrollBehavior) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -260,7 +241,7 @@ private fun HomeScreen(scrollBehavior: MiuixScrollBehavior) {
 }
 
 @Composable
-private fun AboutScreen(scrollBehavior: MiuixScrollBehavior) {
+private fun AboutScreen() {
     val context = LocalContext.current
     val packageInfo = remember {
         context.packageManager.getPackageInfo(context.packageName, 0)
@@ -271,7 +252,6 @@ private fun AboutScreen(scrollBehavior: MiuixScrollBehavior) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)

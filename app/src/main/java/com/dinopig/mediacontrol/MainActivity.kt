@@ -206,11 +206,11 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
         SmallTitle(text = "开关")
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
             SwitchPreference(
-                title = "服务总开关",
+                title = "启用服务",
                 summary = when {
-                    !notificationGranted || !listenerEnabled -> "需要先开启下面两项权限才能启用"
-                    masterEnabled -> "正在运行，Spotify 播放时会生成通知"
-                    else -> "已关闭，不会生成任何通知"
+                    !notificationGranted || !listenerEnabled -> "需要先开启通知权限和通知使用权才能启用"
+                    masterEnabled -> "正在运行，Spotify 播放音乐时会生成通知"
+                    else -> "服务已关闭"
                 },
                 checked = masterEnabled,
                 onCheckedChange = { checked ->
@@ -249,8 +249,8 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
             ) {
                 Text(
                     text = "使用前请注意：\n" +
-                        "- 「通知权限」用于本 App 生成通知\n" +
-                        "- 「通知使用权」用于读取 Spotify 播放状态\n" +
+                        "- “通知权限” 用于本 App 生成通知\n" +
+                        "- “通知使用权” 用于读取 Spotify 播放状态\n" +
                         "- 两项均需开启，服务总开关才能启用",
                     fontSize = 13.sp,
                     color = MiuixTheme.colorScheme.primary
@@ -295,7 +295,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
             Column {
                 SwitchPreference(
                     title = "显示调试通知",
-                    summary = "默认关闭，开启后通知栏会多一条调试信息",
+                    summary = "开启后本应用通知会多一条调试信息",
                     checked = debugNotificationsOn,
                     onCheckedChange = { checked ->
                         debugNotificationsOn = checked
@@ -365,7 +365,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
         SmallTitle(text = "关于")
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
             Text(
-                text = "用一条独立通知，把 HyperOS 锁屏卡片裁剪掉的 Spotify 控件（智能随机播放、收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
+                text = "用一条独立的通知，把被 HyperOS 在媒体通知卡片隐藏掉的 Spotify 播放控件（智能随机播放 / 随机播放 / 收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
                 modifier = Modifier.padding(16.dp)
             )
         }

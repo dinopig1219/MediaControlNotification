@@ -80,7 +80,7 @@ class MediaControlListenerService : NotificationListenerService() {
 
     private fun updateNotification() {
         val masterEnabled = getSharedPreferences("debug_info", Context.MODE_PRIVATE)
-            .getBoolean("master_enabled", true)
+            .getBoolean("master_enabled", false)
         if (!masterEnabled) {
             cancelNotification()
             return

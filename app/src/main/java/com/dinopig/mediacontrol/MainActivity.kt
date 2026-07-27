@@ -347,11 +347,6 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
                 modifier = Modifier
                 .size(96.dp)
                 .clip(RoundedCornerShape(24.dp))
-                ) {
-                Text(
-                    text = "♪",
-                    fontSize = 40.sp,
-                    color = MiuixTheme.colorScheme.onPrimary
                 )
             }
 

@@ -68,6 +68,7 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -199,6 +200,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
+            .overScrollVertical()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
     ) {
@@ -325,6 +327,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
+            .overScrollVertical()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
     ) {

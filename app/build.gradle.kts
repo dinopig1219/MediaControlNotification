@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.dinopig.mediacontrol"
-        minSdk = 26
+        minSdk = 33
         targetSdk = 37
         versionCode = (System.getenv("APP_VERSION_CODE") ?: "1").toInt()
         versionName = "1.0"

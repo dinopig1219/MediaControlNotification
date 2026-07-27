@@ -10,7 +10,7 @@
         android:label="媒体控制通知"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:theme="@style/Theme.MediaControlNotification">
+        android:theme="@android:style/Theme.MediaControlNotification">
 
         <activity
             android:name=".MainActivity"

@@ -240,6 +240,8 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
             )
         }
 
+        SmallTitle(text = "通知")
+
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Column {
                 SwitchPreference(

@@ -60,6 +60,12 @@ import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.font.FontWeight
+import top.yukonga.miuix.kmp.preference.ArrowPreference
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -297,6 +303,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior) {
 @Composable
 private fun AboutScreen(scrollBehavior: ScrollBehavior) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val packageInfo = remember {
         context.packageManager.getPackageInfo(context.packageName, 0)
     }
@@ -308,25 +315,62 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior) {
             .fillMaxSize()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
-            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "媒体控制通知", style = MiuixTheme.textStyles.title3)
-                Text(text = "版本 $versionName ($versionCode)")
-                Text(text = "用一条独立通知，把 HyperOS 锁屏卡片裁剪掉的 Spotify 控件重新显示出来。")
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 56.dp, bottom = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(96.dp)
+                    .background(
+                        color = MiuixTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(24.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "♪",
+                    fontSize = 40.sp,
+                    color = MiuixTheme.colorScheme.onPrimary
+                )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "媒体控制通知",
+                style = MiuixTheme.textStyles.title1,
+                fontWeight = FontWeight.Bold
+            )
+            Text(text = "v$versionName ($versionCode)")
         }
 
+        SmallTitle(text = "关于")
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
-            TextButton(
-                text = "查看 GitHub 仓库",
-                onClick = {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/dinopig1219/MediaControlNotification"))
+            Text(
+                text = "用一条独立通知，把 HyperOS 锁屏卡片裁剪掉的 Spotify 控件（智能随机播放、收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+
+        SmallTitle(text = "链接")
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+            ArrowPreference(
+                title = "查看源码",
+                summary = "项目主页与更新日志",
+                endActions = {
+                    Text(
+                        text = "GitHub",
+                        color = MiuixTheme.colorScheme.onSurfaceVariantActions
                     )
                 },
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                onClick = {
+                    uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
+                }
             )
         }
     }

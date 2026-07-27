@@ -17,7 +17,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -106,17 +105,7 @@ private fun RootScreen() {
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
 
-    val homeScrollBehavior = MiuixScrollBehavior()
-    val aboutScrollBehavior = MiuixScrollBehavior()
-
     Scaffold(
-        topBar = {
-            if (pagerState.currentPage == 0) {
-                TopAppBar(title = "媒体控制通知", scrollBehavior = homeScrollBehavior)
-            } else {
-                TopAppBar(title = "关于", scrollBehavior = aboutScrollBehavior)
-            }
-        },
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
@@ -133,18 +122,38 @@ private fun RootScreen() {
                 )
             }
         }
-    ) { padding ->
+    ) { outerPadding ->
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize().padding(padding)
+            modifier = Modifier.fillMaxSize().padding(outerPadding)
         ) { page ->
-            if (page == 0) HomeScreen(homeScrollBehavior) else AboutScreen(aboutScrollBehavior)
+            if (page == 0) HomePage() else AboutPage()
         }
     }
 }
 
 @Composable
-private fun HomeScreen(scrollBehavior: ScrollBehavior) {
+private fun HomePage() {
+    val scrollBehavior = MiuixScrollBehavior()
+    Scaffold(
+        topBar = { TopAppBar(title = "媒体控制通知", scrollBehavior = scrollBehavior) }
+    ) { padding ->
+        HomeScreen(scrollBehavior, padding)
+    }
+}
+
+@Composable
+private fun AboutPage() {
+    val scrollBehavior = MiuixScrollBehavior()
+    Scaffold(
+        topBar = { TopAppBar(title = "关于", scrollBehavior = scrollBehavior) }
+    ) { padding ->
+        AboutScreen(scrollBehavior, padding)
+    }
+}
+
+@Composable
+private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
 
@@ -187,6 +196,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(padding)
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -225,24 +235,22 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior) {
 
         SmallTitle(text = "通知")
 
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp)
-        ) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
                         MiuixTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(16.dp)
+                        shape = RoundedCornerShape(12.dp)
                     )
-                    .padding(16.dp)
+                    .padding(12.dp)
             ) {
                 Text(
-                    text = "使用前请授权以下两项，缺一不可：\n" +
-                        "「通知权限」用于本 App 生成通知；\n" +
-                        "「通知使用权」用于读取 Spotify 的播放状态。",
+                    text = "使用前请注意：\n" +
+                        "- 「通知权限」用于本 App 生成通知\n" +
+                        "- 「通知使用权」用于读取 Spotify 播放状态\n" +
+                        "- 两项均需开启，服务总开关才能启用",
+                    fontSize = 13.sp,
                     color = MiuixTheme.colorScheme.primary
                 )
             }
@@ -304,7 +312,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior) {
 }
 
 @Composable
-private fun AboutScreen(scrollBehavior: ScrollBehavior) {
+private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val packageInfo = remember {
@@ -316,14 +324,15 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(padding)
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 56.dp, bottom = 4.dp),
+                .padding(top = 32.dp, bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(

@@ -69,6 +69,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
+import com.dinopig.mediacontrol.R
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -337,15 +341,13 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
                 .padding(top = 32.dp, bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Box(
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = null,
                 modifier = Modifier
-                    .size(96.dp)
-                    .background(
-                        color = MiuixTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(24.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
+                .size(96.dp)
+                .clip(RoundedCornerShape(24.dp))
+                ) {
                 Text(
                     text = "♪",
                     fontSize = 40.sp,

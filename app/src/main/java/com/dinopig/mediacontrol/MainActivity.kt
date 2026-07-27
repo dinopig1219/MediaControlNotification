@@ -125,7 +125,9 @@ private fun RootScreen() {
     ) { outerPadding ->
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize().padding(outerPadding)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = outerPadding.calculateBottomPadding())
         ) { page ->
             if (page == 0) HomePage() else AboutPage()
         }
@@ -301,10 +303,9 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
                     }
                 )
 
-                TextButton(
-                    text = "查看调试信息",
-                    onClick = { context.startActivity(Intent(context, DebugActivity::class.java)) },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                ArrowPreference(
+                    title = "查看调试信息",
+                    onClick = { context.startActivity(Intent(context, DebugActivity::class.java)) }
                 )
             }
         }

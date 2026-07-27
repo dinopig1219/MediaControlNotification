@@ -385,4 +385,3 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
             )
         }
     }
-}

@@ -201,10 +201,9 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
             .padding(padding)
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         SmallTitle(text = "开关")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             SwitchPreference(
                 title = "启用服务",
                 summary = when {
@@ -237,7 +236,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
 
         SmallTitle(text = "通知")
 
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -258,7 +257,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
             }
         }
 
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Column {
                 SwitchPreference(
                     title = "通知权限",
@@ -291,7 +290,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
         }
 
         SmallTitle(text = "日志")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Column {
                 SwitchPreference(
                     title = "显示调试通知",
@@ -328,7 +327,6 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
             .padding(padding)
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -363,7 +361,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
         }
 
         SmallTitle(text = "关于")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Text(
                 text = "用一条独立的通知，把被 HyperOS 在媒体通知卡片隐藏掉的 Spotify 播放控件（智能随机播放 / 随机播放 / 收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
                 modifier = Modifier.padding(16.dp)
@@ -371,7 +369,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
         }
 
         SmallTitle(text = "链接")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             ArrowPreference(
                 title = "查看源码",
                 summary = "项目主页与更新日志",

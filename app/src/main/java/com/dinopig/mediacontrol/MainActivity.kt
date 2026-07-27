@@ -369,7 +369,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
         }
 
         SmallTitle(text = "链接")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             ArrowPreference(
                 title = "查看源码",
                 summary = "项目主页与更新日志",

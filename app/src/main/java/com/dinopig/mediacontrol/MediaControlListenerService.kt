@@ -17,6 +17,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.media.app.NotificationCompat.MediaStyle
+import android.content.SharedPreferences
 
 class MediaControlListenerService : NotificationListenerService() {
 
@@ -43,10 +44,26 @@ class MediaControlListenerService : NotificationListenerService() {
     private val sessionsChangedListener =
         MediaSessionManager.OnActiveSessionsChangedListener { controllers -> pickController(controllers) }
 
+    private val prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == "master_enabled") {
+            updateNotification()
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
         createChannel()
         mediaSessionManager = getSystemService(Context.MEDIA_SESSION_SERVICE) as MediaSessionManager
+    
+        getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+            .registerOnSharedPreferenceChangeListener(prefsListener)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        
+        getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+            .unregisterOnSharedPreferenceChangeListener(prefsListener)
     }
 
     override fun onListenerConnected() {

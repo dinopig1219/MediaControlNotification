@@ -69,10 +69,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
-import top.yukonga.miuix.kmp.blur.BlurDefaults
-import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import top.yukonga.miuix.kmp.blur.textureBlur
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -152,26 +148,10 @@ private fun HomePage() {
 @Composable
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
-    val backdrop = rememberLayerBackdrop()
-
-    Box(modifier = Modifier.layerBackdrop(backdrop)) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(animatedGradientBrush())
-        )
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = "关于",
-                    scrollBehavior = scrollBehavior,
-                    color = Color.Transparent
-                )
-            }
-        ) { padding ->
-            AboutScreen(scrollBehavior, padding, backdrop)
-        }
+    Scaffold(
+        topBar = { TopAppBar(title = "关于", scrollBehavior = scrollBehavior) }
+    ) { padding ->
+        AboutScreen(scrollBehavior, padding)
     }
 }
 
@@ -334,7 +314,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
 }
 
 @Composable
-private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues, backdrop: top.yukonga.miuix.kmp.blur.Backdrop) {
+private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val packageInfo = remember {
@@ -384,12 +364,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
         }
 
         SmallTitle(text = "关于")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp).textureBlur(
-            backdrop = backdrop,
-            shape = RoundedCornerShape(16.dp),
-            blurRadius = 20f,
-            noiseCoefficient = BlurDefaults.NoiseCoefficient,
-            colors = BlurDefaults.blurColors()) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Text(
                 text = "用一条独立的通知，把被 HyperOS 在媒体通知卡片隐藏掉的 Spotify 播放控件（智能随机播放 / 随机播放 / 收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
                 modifier = Modifier.padding(16.dp)
@@ -397,12 +372,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
         }
 
         SmallTitle(text = "链接")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp).textureBlur(
-            backdrop = backdrop,
-            shape = RoundedCornerShape(16.dp),
-            blurRadius = 20f,
-            noiseCoefficient = BlurDefaults.NoiseCoefficient,
-            colors = BlurDefaults.blurColors()) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             ArrowPreference(
                 title = "查看源码",
                 summary = "项目主页与更新日志",

@@ -347,8 +347,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
                 modifier = Modifier
                 .size(96.dp)
                 .clip(RoundedCornerShape(24.dp))
-                )
-            }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -385,3 +384,4 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
             )
         }
     }
+}

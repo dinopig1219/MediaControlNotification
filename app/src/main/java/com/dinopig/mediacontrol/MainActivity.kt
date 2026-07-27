@@ -328,7 +328,6 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
             .padding(padding)
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Column(
             modifier = Modifier

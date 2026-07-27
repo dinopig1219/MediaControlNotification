@@ -362,7 +362,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
         }
 
         SmallTitle(text = "关于")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Text(
                 text = "用一条独立的通知，把被 HyperOS 在媒体通知卡片隐藏掉的 Spotify 播放控件（智能随机播放 / 随机播放 / 收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
                 modifier = Modifier.padding(16.dp)

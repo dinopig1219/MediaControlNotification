@@ -73,10 +73,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.draw.clip
 import com.dinopig.mediacontrol.R
-import top.yukonga.miuix.kmp.blur.BlurDefaults
-import top.yukonga.miuix.kmp.blur.layerBackdrop
-import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
-import top.yukonga.miuix.kmp.blur.textureBlur
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -156,26 +152,10 @@ private fun HomePage() {
 @Composable
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
-    val backdrop = rememberLayerBackdrop()
-
-    Box(modifier = Modifier.layerBackdrop(backdrop)) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(animatedGradientBrush())
-        )
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = "关于",
-                    scrollBehavior = scrollBehavior,
-                    color = Color.Transparent
-                )
-            }
-        ) { padding ->
-            AboutScreen(scrollBehavior, padding, backdrop)
-        }
+    Scaffold(
+        topBar = { TopAppBar(title = "关于", scrollBehavior = scrollBehavior) }
+    ) { padding ->
+        AboutScreen(scrollBehavior, padding)
     }
 }
 
@@ -338,7 +318,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
 }
 
 @Composable
-private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues, backdrop: top.yukonga.miuix.kmp.blur.Backdrop) {
+private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val packageInfo = remember {

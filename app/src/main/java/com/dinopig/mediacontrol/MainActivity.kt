@@ -213,7 +213,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
             SwitchPreference(
                 title = "启用服务",
                 summary = when {
-                    !notificationGranted || !listenerEnabled -> "需要先开启通知权限和通知使用权才能启用"
+                    !notificationGranted || !listenerEnabled -> "需要先同时开启通知权限和通知使用权才能启用"
                     masterEnabled -> "正在运行，Spotify 播放音乐时会生成通知"
                     else -> "服务已关闭"
                 },

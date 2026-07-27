@@ -48,6 +48,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.NavigationBar
 import top.yukonga.miuix.kmp.basic.NavigationBarItem
 import top.yukonga.miuix.kmp.basic.Scaffold
@@ -134,7 +135,7 @@ private fun RootScreen() {
 }
 
 @Composable
-private fun HomeScreen(scrollBehavior: MiuixScrollBehavior) {
+private fun HomeScreen(scrollBehavior: ScrollBehavior) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
 
@@ -294,7 +295,7 @@ private fun HomeScreen(scrollBehavior: MiuixScrollBehavior) {
 }
 
 @Composable
-private fun AboutScreen(scrollBehavior: MiuixScrollBehavior) {
+private fun AboutScreen(scrollBehavior: ScrollBehavior) {
     val context = LocalContext.current
     val packageInfo = remember {
         context.packageManager.getPackageInfo(context.packageName, 0)

@@ -240,34 +240,11 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
             )
         }
 
-        SmallTitle(text = "通知")
-
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        MiuixTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                    .padding(12.dp)
-            ) {
-                Text(
-                    text = "使用前请注意：\n" +
-                        "- “通知权限” 用于本 App 生成通知\n" +
-                        "- “通知使用权” 用于读取 Spotify 播放状态\n" +
-                        "- 两项均需开启，服务总开关才能启用",
-                    fontSize = 13.sp,
-                    color = MiuixTheme.colorScheme.primary
-                )
-            }
-        }
-
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Column {
                 SwitchPreference(
                     title = "通知权限",
-                    summary = if (notificationGranted) "已授权" else "未授权，点击开启",
+                    summary = if (notificationGranted) "已授权" else "未授权，用于本 App 生成通知",
                     checked = notificationGranted,
                     onCheckedChange = {
                         if (!notificationAskedBefore) {
@@ -286,7 +263,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
 
                 SwitchPreference(
                     title = "通知使用权",
-                    summary = if (listenerEnabled) "已授权" else "未授权，点击开启",
+                    summary = if (listenerEnabled) "已授权" else "未授权，用于读取 Spotify 播放状态",
                     checked = listenerEnabled,
                     onCheckedChange = {
                         context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))

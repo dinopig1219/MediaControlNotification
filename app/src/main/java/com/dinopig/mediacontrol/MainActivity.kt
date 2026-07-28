@@ -150,18 +150,12 @@ private fun HomePage() {
 }
 
 @Composable
-private fun AboutPage(bottomInset: androidx.compose.ui.unit.Dp) {
+private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = "关于",
-                largeTitle = "",
-                scrollBehavior = scrollBehavior
-            )
-        }
+        topBar = { TopAppBar(title = "关于", scrollBehavior = scrollBehavior) }
     ) { padding ->
-        AboutScreen(scrollBehavior, padding, bottomInset)
+        AboutScreen(scrollBehavior, padding)
     }
 }
 

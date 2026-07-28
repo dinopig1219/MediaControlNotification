@@ -153,7 +153,13 @@ private fun HomePage() {
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
-        topBar = { TopAppBar(title = "关于", scrollBehavior = scrollBehavior) }
+        topBar = { 
+            TopAppBar(
+                title = "关于",
+                largeTitle = "",
+                scrollBehavior = scrollBehavior 
+            ) 
+        }
     ) { padding ->
         AboutScreen(scrollBehavior, padding)
     }

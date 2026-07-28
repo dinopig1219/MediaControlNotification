@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches: [ main, ui-miuix ]
+    branches: [ main, ui-miuix, miuix-fix ]
   workflow_dispatch:
 
 jobs:

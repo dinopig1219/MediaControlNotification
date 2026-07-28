@@ -28,9 +28,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Home
+import top.yukonga.miuix.kmp.icon.extended.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -105,6 +105,13 @@ private fun openAppDetailsSettings(context: Context) {
     context.startActivity(intent)
 }
 
+private fun openBatteryOptimizationSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+        data = Uri.parse("package:${context.packageName}")
+    }
+    context.startActivity(intent)
+}
+
 @Composable
 private fun RootScreen() {
     val pagerState = rememberPagerState(pageCount = { 2 })
@@ -116,13 +123,13 @@ private fun RootScreen() {
                 NavigationBarItem(
                     selected = pagerState.currentPage == 0,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
-                    icon = Icons.Default.Home,
+                    icon = MiuixIcons.Home,
                     label = "主页"
                 )
                 NavigationBarItem(
                     selected = pagerState.currentPage == 1,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
-                    icon = Icons.Default.Info,
+                    icon = MiuixIcons.Demibold.Info,
                     label = "关于"
                 )
             }
@@ -276,6 +283,12 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
                     onCheckedChange = {
                         context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
                     }
+                )
+
+                ArrowPreference(
+                    title = "省电策略（可选）",
+                    summary = "允许后台运行以保持服务更新，避免服务被系统杀掉",
+                    onClick = { openBatteryOptimizationSettings(context) }
                 )
             }
         }

@@ -203,7 +203,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = padding.calculateTopPadding)
+            .padding(top = padding.calculateTopPadding())
             .overScrollVertical()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
@@ -309,7 +309,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = padding.calculateTopPadding)
+            .padding(top = padding.calculateTopPadding())
             .overScrollVertical()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),

@@ -128,12 +128,13 @@ private fun RootScreen() {
             }
         }
     ) { outerPadding ->
-        val bottomInset = outerPadding.calculateBottomPadding()
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = outerPadding.calculateBottomPadding())
         ) { page ->
-            if (page == 0) HomePage(bottomInset) else AboutPage(bottomInset)
+            if (page == 0) HomePage() else AboutPage()
         }
     }
 }

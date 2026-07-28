@@ -28,9 +28,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.icons.Home
+import top.yukonga.miuix.kmp.icon.icons.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -116,13 +116,13 @@ private fun RootScreen() {
                 NavigationBarItem(
                     selected = pagerState.currentPage == 0,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
-                    icon = Icons.Default.Home,
+                    icon = MiuixIcons.Home,
                     label = "主页"
                 )
                 NavigationBarItem(
                     selected = pagerState.currentPage == 1,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
-                    icon = Icons.Default.Info,
+                    icon = MiuixIcons.Info,
                     label = "关于"
                 )
             }

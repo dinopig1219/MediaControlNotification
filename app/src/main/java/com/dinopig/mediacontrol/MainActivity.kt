@@ -129,7 +129,7 @@ private fun RootScreen() {
                 NavigationBarItem(
                     selected = pagerState.currentPage == 1,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
-                    icon = MiuixIcons.Info,
+                    icon = MiuixIcons.Demibold.Info,
                     label = "关于"
                 )
             }

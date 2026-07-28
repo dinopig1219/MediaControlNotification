@@ -65,7 +65,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = MiuixIcons.Demibold.Back,
+                            imageVector = MiuixIcons.Back,
                             contentDescription = "返回"
                         )
                     }

@@ -153,7 +153,13 @@ private fun HomePage() {
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
     Scaffold(
-        topBar = { TopAppBar(title = "关于", scrollBehavior = scrollBehavior) }
+        topBar = { 
+            TopAppBar(
+                title = "关于",
+                largeTitle = "",
+                scrollBehavior = scrollBehavior 
+            ) 
+        }
     ) { padding ->
         AboutScreen(scrollBehavior, padding)
     }
@@ -203,7 +209,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding)
+            .padding(top = padding.calculateTopPadding())
             .overScrollVertical()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
@@ -309,7 +315,7 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding)
+            .padding(top = padding.calculateTopPadding())
             .overScrollVertical()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),

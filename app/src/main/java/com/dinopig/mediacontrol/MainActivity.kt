@@ -12,10 +12,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,18 +39,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import com.dinopig.mediacontrol.effect.BgEffectBackground
 import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -69,10 +71,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.draw.clip
-import com.dinopig.mediacontrol.R
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -152,16 +150,23 @@ private fun HomePage() {
 @Composable
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
-    Scaffold(
-        topBar = { 
-            TopAppBar(
-                title = "关于",
-                largeTitle = "",
-                scrollBehavior = scrollBehavior 
-            ) 
+
+    BgEffectBackground(
+        dynamicBackground = true,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = "关于",
+                    largeTitle = "",
+                    scrollBehavior = scrollBehavior,
+                    color = Color.Transparent
+                )
+            }
+        ) { padding ->
+            AboutScreen(scrollBehavior, padding)
         }
-    ) { padding ->
-        AboutScreen(scrollBehavior, padding)
     }
 }
 
@@ -330,8 +335,8 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 modifier = Modifier
-                .size(96.dp)
-                .clip(RoundedCornerShape(24.dp))
+                    .size(96.dp)
+                    .clip(RoundedCornerShape(24.dp))
             )
 
             Spacer(modifier = Modifier.height(16.dp))

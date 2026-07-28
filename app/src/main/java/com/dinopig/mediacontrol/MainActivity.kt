@@ -105,6 +105,13 @@ private fun openAppDetailsSettings(context: Context) {
     context.startActivity(intent)
 }
 
+private fun openBatteryOptimizationSettings(context: Context) {
+    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+        data = Uri.parse("package:${context.packageName}")
+    }
+    context.startActivity(intent)
+}
+
 @Composable
 private fun RootScreen() {
     val pagerState = rememberPagerState(pageCount = { 2 })
@@ -276,6 +283,12 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
                     onCheckedChange = {
                         context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
                     }
+                )
+
+                ArrowPreference(
+                    title = "省电策略（可选）",
+                    summary = "允许后台运行以保持服务更新，避免服务被系统杀掉",
+                    onClick = { openBatteryOptimizationSettings(context) }
                 )
             }
         }

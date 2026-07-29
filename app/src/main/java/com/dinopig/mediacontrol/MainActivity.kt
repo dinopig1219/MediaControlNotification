@@ -380,10 +380,11 @@ private fun AboutScreen(
     val density = LocalDensity.current
     var logoHeightDp by remember { mutableStateOf(0.dp) }
 
+    // ✨ 完美對齊 InstallerX 的大體積 Logo 區塊與頂部留白
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = padding.calculateTopPadding() + 92.dp) 
+            .padding(top = padding.calculateTopPadding() + 52.dp) // 採用 InstallerX 的 52.dp 標準留白[span_4](start_span)[span_4](end_span)
             .onSizeChanged { size -> 
                 with(density) { logoHeightDp = size.height.toDp() }
             },
@@ -392,7 +393,7 @@ private fun AboutScreen(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(88.dp) 
+                .size(110.dp) // 放大外框，對齊 InstallerX 的視覺份量
                 .graphicsLayer {
                     val iconProgress = ((scrollProgress - 0.35f) / 0.15f).coerceIn(0f, 1f)
                     alpha = 1f - iconProgress
@@ -404,7 +405,7 @@ private fun AboutScreen(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(74.dp) 
+                    .size(96.dp) // 恢復你原本大氣的 Icon 尺寸
                     .clip(RoundedCornerShape(24.dp))
             )
         }
@@ -414,7 +415,7 @@ private fun AboutScreen(
             style = MiuixTheme.textStyles.title1,
             fontWeight = FontWeight.Bold,
             modifier = Modifier
-                .padding(top = 12.dp, bottom = 5.dp) 
+                .padding(top = 12.dp, bottom = 5.dp)
                 .graphicsLayer {
                     val projectNameProgress = ((scrollProgress - 0.20f) / 0.15f).coerceIn(0f, 1f)
                     alpha = 1f - projectNameProgress
@@ -444,17 +445,18 @@ private fun AboutScreen(
         contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
     ) {
         
+        // ✨ 配合放大後的 Logo 區塊，調整隱形方塊高度，讓卡片完美接在下方
         item(key = "logoSpacer") {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(logoHeightDp + 218.dp) 
+                    .height(logoHeightDp + 180.dp) 
             )
         }
 
         item(key = "about") {
             Box {
-                Spacer(Modifier.fillParentMaxHeight()) 
+                Spacer(Modifier.fillParentMaxHeight())
                 Column(modifier = Modifier.fillMaxWidth()) {
                     SmallTitle(text = "关于")
                     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {

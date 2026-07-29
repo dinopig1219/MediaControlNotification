@@ -12,7 +12,8 @@ android {
         minSdk = 33
         targetSdk = 37
         versionCode = (System.getenv("APP_VERSION_CODE") ?: "1").toInt()
-        versionName = "1.0"
+        val commitSha = System.getenv("APP_COMMIT_SHA")?.take(7) 
+        versionName = if (commitSha != null) "1.0-$commitSha" else "1.0"
     }
 
     signingConfigs {

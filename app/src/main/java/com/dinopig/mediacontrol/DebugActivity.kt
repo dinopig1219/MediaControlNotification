@@ -47,6 +47,12 @@ import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 
+data class DebugData(
+    val logInfo: String,
+    val song: String,
+    val artist: String
+)
+
 class DebugActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,8 +70,8 @@ class DebugActivity : ComponentActivity() {
 private fun DebugScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scrollBehavior = MiuixScrollBehavior()
-    var info by remember { mutableStateOf(loadDebugInfo(context)) }
-
+    
+    var debugData by remember { mutableStateOf(loadDebugInfo(context)) }
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -85,7 +91,7 @@ private fun DebugScreen(onBack: () -> Unit) {
             )
         }
     ) { padding ->
-                Column(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = padding.calculateTopPadding() - 4.dp) 
@@ -95,6 +101,28 @@ private fun DebugScreen(onBack: () -> Unit) {
                 .padding(bottom = padding.calculateBottomPadding()),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            
+            SmallTitle(text = "当前播放状态")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp)
+                ) {
+                    Text(
+                        text = "歌曲信息",
+                        fontSize = 16.sp,
+                        color = MiuixTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "歌曲：${debugData.song}\n歌手：${debugData.artist}",
+                        fontSize = 14.sp,
+                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                        modifier = Modifier.padding(top = 4.dp),
+                        lineHeight = 20.sp
+                    )
+                }
+            }
 
             Row(
                 modifier = Modifier
@@ -126,7 +154,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                             coroutineScope.launch {
                                 isRefreshing = true
                                 delay(1500)
-                                info = loadDebugInfo(context)
+                                debugData = loadDebugInfo(context) // ✨ 更新綜合資料
                                 isRefreshing = false
                             }
                         }
@@ -137,7 +165,7 @@ private fun DebugScreen(onBack: () -> Unit) {
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
                 SelectionContainer {
                     Text(
-                        text = info,
+                        text = debugData.logInfo,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -147,8 +175,11 @@ private fun DebugScreen(onBack: () -> Unit) {
     }
 }
 
-private fun loadDebugInfo(context: Context): String {
-    val info = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
-        .getString("last_debug_info", null)
-    return info ?: "还没有数据。请先播放 Spotify，确保已授权通知使用权。"
+private fun loadDebugInfo(context: Context): DebugData {
+    val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+    val info = prefs.getString("last_debug_info", null) ?: "还没有数据。请先播放 Spotify，确保已授权通知使用权。"
+    val song = prefs.getString("current_song", "未知") ?: "未知"
+    val artist = prefs.getString("current_artist", "未知") ?: "未知"
+    
+    return DebugData(logInfo = info, song = song, artist = artist)
 }

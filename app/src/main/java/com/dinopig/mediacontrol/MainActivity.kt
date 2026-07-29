@@ -412,19 +412,23 @@ private fun AboutScreen(
                 .size(88.dp)
                 .graphicsLayer {
                     val iconProgress = ((scrollProgress - 0.35f) / 0.15f).coerceIn(0f, 1f)
+                    
+                    clip = true 
+                    shape = RoundedCornerShape(24.dp)
+                    
                     alpha = 1f - iconProgress
                     scaleX = 1f - (iconProgress * 0.05f)
                     scaleY = 1f - (iconProgress * 0.05f)
                 }
+                .background(Color.White)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                modifier = Modifier.size(74.dp)
             )
         }
+
 
         Text(
             text = "媒体控制通知",

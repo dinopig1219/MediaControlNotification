@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches: [ main, ui-miuix, miuix-about ]
+    branches: [ main, ui-miuix ]
   workflow_dispatch:
 
 jobs:
@@ -37,11 +37,12 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           APP_VERSION_CODE: ${{ github.run_number }}
+          APP_COMMIT_SHA: ${{ github.sha }}
         run: gradle assembleDebug assembleRelease
 
       - name: Rename APKs
         run: |
-          VERSION_NAME=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+          VERSION_NAME="1.0-${GITHUB_SHA::7}"
           VERSION_CODE="${{ github.run_number }}"
           mv "app/build/outputs/apk/debug/app-debug.apk" \
              "app/build/outputs/apk/debug/MediaControlNotification_${VERSION_NAME}(${VERSION_CODE})-debug.apk"

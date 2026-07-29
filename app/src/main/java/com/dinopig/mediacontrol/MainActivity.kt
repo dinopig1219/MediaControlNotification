@@ -204,7 +204,7 @@ private fun AboutPage() {
                     title = "关于",
                     largeTitle = "",
                     scrollBehavior = scrollBehavior,
-                    color = Color.Transparent,
+                    color = MiuixTheme.colorScheme.surface.copy(alpha = scrollProgress),
                     titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
                 )
             }

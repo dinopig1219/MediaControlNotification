@@ -90,6 +90,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 class MainActivity : ComponentActivity() {
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -110,7 +111,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
+    
     override fun onStop() {
         super.onStop()
         val prefs = getSharedPreferences("debug_info", Context.MODE_PRIVATE)

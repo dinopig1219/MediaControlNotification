@@ -89,13 +89,24 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val isDarkTheme = isSystemInDarkTheme()
+            val view = LocalView.current
+            
+            if (!view.isInEditMode) {
+                SideEffect {
+                    val window = (view.context as Activity).window
+                    WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDarkTheme
+                }
+            }
+
             MiuixTheme(
-                colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+                colors = if (isDarkTheme) darkColorScheme() else lightColorScheme()
             ) {
                 RootScreen()
             }
         }
     }
+}
     override fun onStop() {
         super.onStop()
         val prefs = getSharedPreferences("debug_info", Context.MODE_PRIVATE)

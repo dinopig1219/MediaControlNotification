@@ -13,15 +13,21 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -32,6 +38,7 @@ import top.yukonga.miuix.kmp.icon.extended.Home
 import top.yukonga.miuix.kmp.icon.extended.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +48,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
@@ -71,6 +80,10 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -157,11 +170,26 @@ private fun HomePage() {
 @Composable
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
+    val lazyListState = rememberLazyListState()
+    var logoSpacerHeightPx by remember { mutableStateOf(0) }
 
-    BgEffectBackground(
-        dynamicBackground = true,
-        modifier = Modifier.fillMaxSize()
-    ) {
+    val scrollProgress by remember {
+        derivedStateOf {
+            if (logoSpacerHeightPx <= 0) return@derivedStateOf 0f
+            val index = lazyListState.firstVisibleItemIndex
+            val offset = lazyListState.firstVisibleItemScrollOffset
+            if (index > 0) 1f else (offset.toFloat() / logoSpacerHeightPx).coerceIn(0f, 1f)
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        BgEffectBackground(
+            dynamicBackground = true,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer { alpha = 1f - scrollProgress }
+        ) { }
+
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
@@ -169,17 +197,24 @@ private fun AboutPage() {
                     title = "关于",
                     largeTitle = "",
                     scrollBehavior = scrollBehavior,
-                    color = Color.Transparent
+                    color = Color.Transparent,
+                    titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
                 )
             }
         ) { padding ->
-            AboutScreen(scrollBehavior, padding)
+            AboutScreen(
+                scrollBehavior = scrollBehavior,
+                padding = padding,
+                lazyListState = lazyListState,
+                scrollProgress = scrollProgress,
+                onLogoSpacerHeightChanged = { logoSpacerHeightPx = it }
+            )
         }
     }
 }
 
 @Composable
-private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues) {
+private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
 
@@ -259,7 +294,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
             )
         }
 
-        SmallTitle(text = "通知")
+        SmallTitle(text = "权限设置")
 
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Column {
@@ -322,7 +357,13 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
 }
 
 @Composable
-private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues) {
+private fun AboutScreen(
+    scrollBehavior: ScrollBehavior,
+    padding: PaddingValues,
+    lazyListState: LazyListState,
+    scrollProgress: Float,
+    onLogoSpacerHeightChanged: (Int) -> Unit
+) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val packageInfo = remember {
@@ -331,61 +372,123 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
     val versionName = packageInfo.versionName ?: "未知"
     val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 
+    val density = LocalDensity.current
+    var logoHeightDp by remember { mutableStateOf(0.dp) }
+
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(top = padding.calculateTopPadding())
-            .overScrollVertical()
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .verticalScroll(rememberScrollState()),
+            .fillMaxWidth()
+            .padding(top = padding.calculateTopPadding() + 40.dp)
+            .onSizeChanged { size ->
+                with(density) { logoHeightDp = size.height.toDp() }
+            },
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 32.dp, bottom = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .size(88.dp)
+                .graphicsLayer {
+                    val iconProgress = ((scrollProgress - 0.35f) / 0.15f).coerceIn(0f, 1f)
+                    alpha = 1f - iconProgress
+                    scaleX = 1f - (iconProgress * 0.05f)
+                    scaleY = 1f - (iconProgress * 0.05f)
+                }
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(96.dp)
+                    .size(80.dp)
                     .clip(RoundedCornerShape(24.dp))
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "媒体控制通知",
-                style = MiuixTheme.textStyles.title1,
-                fontWeight = FontWeight.Bold
-            )
-            Text(text = "v$versionName ($versionCode)")
         }
 
-        SmallTitle(text = "关于")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            Text(
-                text = "用一条独立的通知，把被 HyperOS 在媒体通知卡片隐藏掉的 Spotify 播放控件（智能随机播放 / 随机播放 / 收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-
-        SmallTitle(text = "链接")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            ArrowPreference(
-                title = "查看源码",
-                summary = "项目主页与更新日志",
-                endActions = {
-                    Text(
-                        text = "GitHub",
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                    )
-                },
-                onClick = {
-                    uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
+        Text(
+            text = "媒体控制通知",
+            style = MiuixTheme.textStyles.title1,
+            fontWeight = FontWeight.Bold,
+            fontSize = 35.sp,
+            modifier = Modifier
+                .padding(top = 12.dp, bottom = 5.dp)
+                .graphicsLayer {
+                    val projectNameProgress = ((scrollProgress - 0.20f) / 0.15f).coerceIn(0f, 1f)
+                    alpha = 1f - projectNameProgress
+                    scaleX = 1f - (projectNameProgress * 0.05f)
+                    scaleY = 1f - (projectNameProgress * 0.05f)
                 }
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    val versionProgress = ((scrollProgress - 0.05f) / 0.15f).coerceIn(0f, 1f)
+                    alpha = 1f - versionProgress
+                    scaleX = 1f - (versionProgress * 0.05f)
+                    scaleY = 1f - (versionProgress * 0.05f)
+                },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "v$versionName ($versionCode)",
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                fontSize = 14.sp
             )
+        }
+    }
+
+    LazyColumn(
+        state = lazyListState,
+        modifier = Modifier
+            .fillMaxSize()
+            .scrollEndHaptic()
+            .overScrollVertical()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
+    ) {
+        item(key = "logoSpacer") {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(logoHeightDp + 52.dp + 40.dp + 82.dp)
+                    .onSizeChanged { size -> onLogoSpacerHeightChanged(size.height) }
+            )
+        }
+
+        item(key = "about_content") {
+            Column(
+                modifier = Modifier
+                    .fillParentMaxHeight()
+                    .padding(bottom = 16.dp)
+            ) {
+                SmallTitle(text = "链接")
+                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                    Column {
+                        ArrowPreference(
+                            title = "查看源码",
+                            summary = "项目主页与更新日志",
+                            endActions = {
+                                Text(
+                                    text = "GitHub",
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                                )
+                            },
+                            onClick = {
+                                uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
+                            }
+                        )
+                        
+                        ArrowPreference(
+                            title = "检查更新",
+                            summary = "检查软件版本更新和新功能",
+                            onClick = {
+                                uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification/releases")
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }

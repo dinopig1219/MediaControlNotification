@@ -103,7 +103,7 @@ private fun DebugScreen(onBack: () -> Unit) {
         ) {
             
             SmallTitle(text = "当前播放状态")
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -154,7 +154,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                             coroutineScope.launch {
                                 isRefreshing = true
                                 delay(1500)
-                                debugData = loadDebugInfo(context) // ✨ 更新綜合資料
+                                debugData = loadDebugInfo(context)
                                 isRefreshing = false
                             }
                         }
@@ -162,7 +162,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                 }
             }
 
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 SelectionContainer {
                     Text(
                         text = debugData.logInfo,

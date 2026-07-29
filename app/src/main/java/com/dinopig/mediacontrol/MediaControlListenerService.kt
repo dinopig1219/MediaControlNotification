@@ -22,7 +22,7 @@ import android.content.SharedPreferences
 class MediaControlListenerService : NotificationListenerService() {
 
     companion object {
-        const val CHANNEL_ID = "media_control_patch"
+        const val CHANNEL_ID = "media_control_notification"
         const val NOTIFICATION_ID = 9001
         const val DEBUG_NOTIFICATION_ID = 9002
         val TARGET_PACKAGES = setOf("com.spotify.music")
@@ -143,7 +143,7 @@ class MediaControlListenerService : NotificationListenerService() {
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, builder.build())
 
         // 完整调试信息一直存起来，App 里的 DebugActivity 随时能看到最新的
-        saveDebugInfo(state)
+        saveDebugInfo(state, metadata)
 
         // 调试通知本身要不要发，看用户在 App 里那个开关
         val debugNotificationsOn = getSharedPreferences("debug_info", Context.MODE_PRIVATE)

@@ -1,6 +1,7 @@
 package com.dinopig.mediacontrol
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -15,11 +16,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,11 +33,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Home
-import top.yukonga.miuix.kmp.icon.extended.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,20 +44,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.dinopig.mediacontrol.effect.BgEffectBackground
@@ -72,26 +73,20 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.VerticalScrollBar
+import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Home
+import top.yukonga.miuix.kmp.icon.extended.Info
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
-import android.app.Activity
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
-import top.yukonga.miuix.kmp.basic.VerticalScrollBar
-import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
-import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
-import androidx.compose.foundation.layout.fillMaxHeight
 
 class MainActivity : ComponentActivity() {
     
@@ -239,115 +234,6 @@ private fun AboutPage() {
         }
     }
 }
-
-@Composable
-private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
-    val context = LocalContext.current
-    val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
-
-    var notificationGranted by remember { mutableStateOf(isNotificationPermissionGranted(context)) }
-    var listenerEnabled by remember { mutableStateOf(isNotificationListenerEnabled(context)) }
-    var notificationAskedBefore by remember {
-        mutableStateOf(prefs.getBoolean("notification_permission_asked", false))
-    }
-    var masterEnabled by remember {
-        mutableStateOf(
-            prefs.getBoolean("master_enabled", false) &&
-                isNotificationPermissionGranted(context) &&
-                isNotificationListenerEnabled(context)
-        )
-    }
-    var debugNotificationsOn by remember {
-        mutableStateOf(prefs.getBoolean("debug_notifications_enabled", false))
-    }
-
-    var hideRecentsEnabled by remember {
-        mutableStateOf(prefs.getBoolean("hide_recents_enabled", false))
-    }
-
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted -> notificationGranted = granted }
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                notificationGranted = isNotificationPermissionGranted(context)
-                listenerEnabled = isNotificationListenerEnabled(context)
-                if ((!notificationGranted || !listenerEnabled) && masterEnabled) {
-                    masterEnabled = false
-                    prefs.edit().putBoolean("master_enabled", false).apply()
-                }
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = padding.calculateTopPadding())
-            .scrollEndHaptic()
-            .overScrollVertical()
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .verticalScroll(rememberScrollState()),
-    ) {
-        SmallTitle(text = "总开关")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            SwitchPreference(
-                title = "启用服务",
-                summary = when {
-                    !notificationGranted || !listenerEnabled -> "需要先同时开启通知权限和通知使用权才能启用"
-                    masterEnabled -> "正在运行，Spotify 播放音乐时会生成通知"
-                    else -> "服务已关闭"
-                },
-                checked = masterEnabled,
-                onCheckedChange = { checked ->
-                    if (checked && (!notificationGranted || !listenerEnabled)) {
-                        when {
-                            !notificationGranted -> {
-                                notificationAskedBefore = true
-                                prefs.edit().putBoolean("notification_permission_asked", true).apply()
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                }
-                            }
-                            !listenerEnabled -> {
-                                context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                            }
-                        }
-                    } else {
-                        masterEnabled = checked
-                        prefs.edit().putBoolean("master_enabled", checked).apply()
-                    }
-                }
-            )
-        }
-
-        SmallTitle(text = "权限设置")
-
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            Column {
-                SwitchPreference(
-                    title = "通知权限",
-                    summary = if (notificationGranted) "已授权" else "未授权，用于本 App 生成通知",
-                    checked = notificationGranted,
-                    onCheckedChange = {
-                        if (!notificationAskedBefore) {
-                            notificationAskedBefore = true
-                            prefs.edit().putBoolean("notification_permission_asked", true).apply()
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            } else {
-                                notificationGranted = true
-                            }
-                        } else {
-                            openAppDetailsSettings(context)
-                        }
-                    }
-                )
 
 @OptIn(ExperimentalScrollBarApi::class)
 @Composable
@@ -560,10 +446,8 @@ private fun AboutScreen(
                 .size(88.dp)
                 .graphicsLayer {
                     val iconProgress = ((scrollProgress - 0.35f) / 0.15f).coerceIn(0f, 1f)
-                    
                     clip = true 
                     shape = RoundedCornerShape(24.dp)
-                    
                     alpha = 1f - iconProgress
                     scaleX = 1f - (iconProgress * 0.05f)
                     scaleY = 1f - (iconProgress * 0.05f)
@@ -576,7 +460,6 @@ private fun AboutScreen(
                 modifier = Modifier.size(74.dp)
             )
         }
-
 
         Text(
             text = "媒体控制通知",
@@ -613,64 +496,64 @@ private fun AboutScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-    LazyColumn(
-        state = lazyListState,
-        modifier = Modifier
-            .fillMaxSize()
-            .scrollEndHaptic()
-            .overScrollVertical()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
-    ) {
-        item(key = "logoSpacer") {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(logoHeightDp + 52.dp + 40.dp + 82.dp)
-                    .onSizeChanged { size -> onLogoSpacerHeightChanged(size.height) }
-            )
-        }
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier
+                .fillMaxSize()
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
+        ) {
+            item(key = "logoSpacer") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(logoHeightDp + 52.dp + 40.dp + 82.dp)
+                        .onSizeChanged { size -> onLogoSpacerHeightChanged(size.height) }
+                )
+            }
 
-        item(key = "about_content") {
-            Column(
-                modifier = Modifier
-                    .fillParentMaxHeight()
-                    .padding(bottom = 16.dp)
-            ) {
-                SmallTitle(text = "链接")
-                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                    Column {
-                        ArrowPreference(
-                            title = "查看源码",
-                            summary = "项目主页与更新日志",
-                            endActions = {
-                                Text(
-                                    text = "GitHub",
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                                )
-                            },
-                            onClick = {
-                                uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
-                            }
-                        )
-                        
-                        ArrowPreference(
-                            title = "检查更新",
-                            summary = "检查软件版本更新和新功能",
-                            onClick = {
-                                uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification/releases")
-                            }
-                        )
+            item(key = "about_content") {
+                Column(
+                    modifier = Modifier
+                        .fillParentMaxHeight()
+                        .padding(bottom = 16.dp)
+                ) {
+                    SmallTitle(text = "链接")
+                    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                        Column {
+                            ArrowPreference(
+                                title = "查看源码",
+                                summary = "项目主页与更新日志",
+                                endActions = {
+                                    Text(
+                                        text = "GitHub",
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                                    )
+                                },
+                                onClick = {
+                                    uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
+                                }
+                            )
+                            
+                            ArrowPreference(
+                                title = "检查更新",
+                                summary = "检查软件版本更新和新功能",
+                                onClick = {
+                                    uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification/releases")
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
-    }
-    VerticalScrollBar(
+        VerticalScrollBar(
             adapter = rememberScrollBarAdapter(lazyListState),
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
         )
-}
+    }
 }

@@ -16,6 +16,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -178,14 +179,29 @@ private fun AboutPage() {
         }
     }
 
-    BgEffectBackground(
-        dynamicBackground = true,
-        modifier = Modifier.fillMaxSize()
+    // ✨ 1. 最外層 Box：提供最底層的純色背景 (亮色模式為白，暗色模式為黑)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MiuixTheme.colorScheme.background)
     ) {
+        // ✨ 2. 背景特效層：將透明度與 scrollProgress 綁定！
+        BgEffectBackground(
+            dynamicBackground = true,
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    // 隨著往上滑，scrollProgress 變大，彩色漸變背景的透明度就會趨近於 0 (完全消失)
+                    alpha = 1f - scrollProgress
+                }
+        ) {
+            // 裡面留空，不放任何元件，單純作為背景圖層
+        }
+
+        // ✨ 3. 內容層：原本的 Scaffold 蓋在特效層上面
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                // 原汁原味的 TopAppBar + 漸變顏色
                 TopAppBar(
                     title = "关于",
                     largeTitle = "",
@@ -407,8 +423,6 @@ private fun AboutScreen(
             }
         }
 
-        // ✨ 魔法在這裡：使用 fillParentMaxHeight() 讓內容區塊「至少佔滿整個螢幕高度」
-        // 這樣就算你只有兩張小卡片，捲動條也會有足夠的空間讓你把上方的 Logo 完全推出去！
         item {
             Column(
                 modifier = Modifier

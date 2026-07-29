@@ -96,6 +96,13 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    override fun onStop() {
+        super.onStop()
+        val prefs = getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("hide_recents_enabled", false)) {
+            finishAndRemoveTask()
+        }
+    }
 }
 
 private fun isNotificationPermissionGranted(context: Context): Boolean {
@@ -197,7 +204,7 @@ private fun AboutPage() {
                     title = "关于",
                     largeTitle = "",
                     scrollBehavior = scrollBehavior,
-                    color = Color.Transparent,
+                    color = if (scrollProgress > 0.99f) MiuixTheme.colorScheme.surface else Color.Transparent,
                     titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
                 )
             }
@@ -234,6 +241,10 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
         mutableStateOf(prefs.getBoolean("debug_notifications_enabled", false))
     }
 
+    var hideRecentsEnabled by remember {
+        mutableStateOf(prefs.getBoolean("hide_recents_enabled", false))
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted -> notificationGranted = granted }
@@ -258,11 +269,12 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
         modifier = Modifier
             .fillMaxSize()
             .padding(top = padding.calculateTopPadding())
+            .scrollEndHaptic()
             .overScrollVertical()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
     ) {
-        SmallTitle(text = "开关")
+        SmallTitle(text = "总开关")
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             SwitchPreference(
                 title = "启用服务",
@@ -330,6 +342,16 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                     title = "省电策略（可选）",
                     summary = "允许后台运行以保持服务更新，避免服务被系统杀掉",
                     onClick = { openBatteryOptimizationSettings(context) }
+                )
+
+                SwitchPreference(
+                    title = "隐藏后台窗口",
+                    summary = "切换到后台时自动从最近任务中隐藏",
+                    checked = hideRecentsEnabled,
+                    onCheckedChange = { checked ->
+                        hideRecentsEnabled = checked
+                        prefs.edit().putBoolean("hide_recents_enabled", checked).apply()
+                    }
                 )
             }
         }

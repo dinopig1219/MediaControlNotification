@@ -88,28 +88,31 @@ private fun DebugScreen(onBack: () -> Unit) {
                 Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
+                .padding(top = padding.calculateTopPadding() - 4.dp) 
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = padding.calculateBottomPadding())
+                .padding(bottom = padding.calculateBottomPadding()),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 16.dp),
+                    .padding(end = 28.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SmallTitle(
                     text = "信息输出",
-                    modifier = Modifier.padding(0.dp)
+                    modifier = Modifier.padding(bottom = 0.dp)
                 )
 
                 if (isRefreshing) {
                     InfiniteProgressIndicator(
                         modifier = Modifier
                             .size(20.dp)
+                            .align(Alignment.CenterVertically)
                     )
                 } else {
                     Text(

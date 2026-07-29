@@ -370,6 +370,14 @@ private fun AboutScreen(
     scrollProgress: Float
 ) {
     val context = LocalContext.current
+@Composable
+private fun AboutScreen(
+    scrollBehavior: ScrollBehavior, 
+    padding: PaddingValues,
+    lazyListState: LazyListState,
+    scrollProgress: Float
+) {
+    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val packageInfo = remember {
         context.packageManager.getPackageInfo(context.packageName, 0)
@@ -380,11 +388,11 @@ private fun AboutScreen(
     val density = LocalDensity.current
     var logoHeightDp by remember { mutableStateOf(0.dp) }
 
-    // ✨ 完美對齊 InstallerX 的大體積 Logo 區塊與頂部留白
+    // ✨ 完美對齊 InstallerX 的 Logo 區塊留白
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = padding.calculateTopPadding() + 52.dp) // 採用 InstallerX 的 52.dp 標準留白[span_4](start_span)[span_4](end_span)
+            .padding(top = padding.calculateTopPadding() + 64.dp) 
             .onSizeChanged { size -> 
                 with(density) { logoHeightDp = size.height.toDp() }
             },
@@ -393,7 +401,7 @@ private fun AboutScreen(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(110.dp) // 放大外框，對齊 InstallerX 的視覺份量
+                .size(96.dp) 
                 .graphicsLayer {
                     val iconProgress = ((scrollProgress - 0.35f) / 0.15f).coerceIn(0f, 1f)
                     alpha = 1f - iconProgress
@@ -405,7 +413,7 @@ private fun AboutScreen(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(96.dp) // 恢復你原本大氣的 Icon 尺寸
+                    .size(80.dp) 
                     .clip(RoundedCornerShape(24.dp))
             )
         }
@@ -414,8 +422,9 @@ private fun AboutScreen(
             text = "媒体控制通知",
             style = MiuixTheme.textStyles.title1,
             fontWeight = FontWeight.Bold,
+            fontSize = 32.sp, // 採用 InstallerX 具備份量感的大字體
             modifier = Modifier
-                .padding(top = 12.dp, bottom = 5.dp)
+                .padding(top = 10.dp, bottom = 4.dp)
                 .graphicsLayer {
                     val projectNameProgress = ((scrollProgress - 0.20f) / 0.15f).coerceIn(0f, 1f)
                     alpha = 1f - projectNameProgress
@@ -445,18 +454,18 @@ private fun AboutScreen(
         contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
     ) {
         
-        // ✨ 配合放大後的 Logo 區塊，調整隱形方塊高度，讓卡片完美接在下方
+        // ✨ 關鍵調整：採用 InstallerX 的高度公式，讓卡片往上拉高，身型跟右邊完全一致
         item(key = "logoSpacer") {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(logoHeightDp + 180.dp) 
+                    .height(logoHeightDp + 130.dp) 
             )
         }
 
         item(key = "about") {
             Box {
-                Spacer(Modifier.fillParentMaxHeight())
+                Spacer(Modifier.fillParentMaxHeight()) 
                 Column(modifier = Modifier.fillMaxWidth()) {
                     SmallTitle(text = "关于")
                     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {

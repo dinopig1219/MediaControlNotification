@@ -473,7 +473,7 @@ private fun AboutScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "v$versionName ($versionCode)",
+                text = "$versionName ($versionCode)",
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 fontSize = 14.sp
             )

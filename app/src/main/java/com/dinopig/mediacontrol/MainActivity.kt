@@ -197,7 +197,8 @@ private fun AboutPage() {
                     title = "关于",
                     largeTitle = "",
                     scrollBehavior = scrollBehavior,
-                    color = Color.Transparent
+                    color = Color.Transparent,
+                    titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
                 )
             }
         ) { padding ->
@@ -456,7 +457,11 @@ private fun AboutScreen(
         }
 
         item(key = "about_content") {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillParentMaxHeight()
+                    .padding(bottom = 16.dp)
+            ) {
                 SmallTitle(text = "关于")
                 Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                     Text(

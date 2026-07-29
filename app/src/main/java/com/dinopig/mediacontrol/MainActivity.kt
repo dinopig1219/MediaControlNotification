@@ -159,6 +159,7 @@ private fun AboutPage() {
             .background(Color.Red)
     ) {
         Scaffold(
+            containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
                     title = "关于",

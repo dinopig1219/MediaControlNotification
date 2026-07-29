@@ -4,35 +4,44 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
+import top.yukonga.miuix.kmp.basic.ProgressIndicator
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
@@ -56,6 +65,10 @@ private fun DebugScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scrollBehavior = MiuixScrollBehavior()
     var info by remember { mutableStateOf(loadDebugInfo(context)) }
+
+    // ✨ 新增：用於控制轉圈圈動畫的狀態與協程
+    var isRefreshing by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -83,11 +96,45 @@ private fun DebugScreen(onBack: () -> Unit) {
                 .padding(bottom = padding.calculateBottomPadding()),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            TextButton(
-                text = "刷新",
-                onClick = { info = loadDebugInfo(context) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
-            )
+            
+            // ✨ 替換：帶有互動效果的 Miuix 風格標題列
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 28.dp), // 向內縮排，對齊下方的卡片邊緣
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SmallTitle(
+                    text = "信息输出",
+                    modifier = Modifier.padding(bottom = 0.dp) // 取消預設底部間距，讓元素垂直置中
+                )
+
+                if (isRefreshing) {
+                    // 顯示轉圈動畫
+                    ProgressIndicator(
+                        modifier = Modifier.size(20.dp)
+                    )
+                } else {
+                    // 顯示藍色刷新文字
+                    Text(
+                        text = "刷新",
+                        color = MiuixTheme.colorScheme.primary, // Miuix 主題強調色
+                        fontSize = 14.sp,
+                        modifier = Modifier.clickable(
+                            indication = null, // 去除點擊時的方形水波紋，使其更像原生按鈕
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            coroutineScope.launch {
+                                isRefreshing = true
+                                delay(2000) // 強制轉兩秒
+                                info = loadDebugInfo(context) // 更新資料
+                                isRefreshing = false
+                            }
+                        }
+                    )
+                }
+            }
 
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
                 SelectionContainer {

@@ -95,24 +95,23 @@ private fun DebugScreen(onBack: () -> Unit) {
                 .padding(bottom = padding.calculateBottomPadding()),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-
-            Row(
-                modifier = Modifier
+                    Row(
+                        modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 28.dp),
+                    .padding(horizontal = 12.dp)
+                    .padding(top = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Bottom
             ) {
                 SmallTitle(
                     text = "信息输出",
-                    modifier = Modifier.padding(bottom = 0.dp)
+                    modifier = Modifier.padding(0.dp)
                 )
 
                 if (isRefreshing) {
                     InfiniteProgressIndicator(
                         modifier = Modifier
                             .size(20.dp)
-                            .align(Alignment.CenterVertically)
                     )
                 } else {
                     Text(

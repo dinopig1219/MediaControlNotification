@@ -332,7 +332,6 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
                 .padding(top = 32.dp, bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = "shader supported: ${top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported()}")
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,

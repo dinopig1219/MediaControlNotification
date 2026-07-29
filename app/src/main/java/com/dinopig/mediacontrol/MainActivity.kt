@@ -88,6 +88,9 @@ import android.app.Activity
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import top.yukonga.miuix.kmp.basic.VerticalScrollBar
+import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 
 class MainActivity : ComponentActivity() {
     
@@ -400,6 +403,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
     }
 }
 
+@OptIn(ExperimentalScrollBarApi::class)
 @Composable
 private fun AboutScreen(
     scrollBehavior: ScrollBehavior,
@@ -486,6 +490,7 @@ private fun AboutScreen(
         }
     }
 
+    Box(modifier = Modifier.fillMaxSize()) {
     LazyColumn(
         state = lazyListState,
         modifier = Modifier
@@ -539,4 +544,11 @@ private fun AboutScreen(
             }
         }
     }
+    VerticalScrollBar(
+            adapter = rememberScrollBarAdapter(lazyListState),
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+        )
+}
 }

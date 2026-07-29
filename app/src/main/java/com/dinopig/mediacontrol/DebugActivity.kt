@@ -85,18 +85,17 @@ private fun DebugScreen(onBack: () -> Unit) {
             )
         }
     ) { padding ->
-        Column(
+                Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
+                .padding(top = padding.calculateTopPadding() - 4.dp) 
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(rememberScrollState())
                 .padding(bottom = padding.calculateBottomPadding()),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            
-            // Miuix 風格標題列：左邊「信息輸出」，右邊「刷新」或「轉圈動畫」
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -110,7 +109,6 @@ private fun DebugScreen(onBack: () -> Unit) {
                 )
 
                 if (isRefreshing) {
-                    // 使用官方正統的 InfiniteProgressIndicator 轉圈圈[span_2](start_span)[span_2](end_span)
                     InfiniteProgressIndicator(
                         modifier = Modifier
                             .size(20.dp)
@@ -127,7 +125,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                         ) {
                             coroutineScope.launch {
                                 isRefreshing = true
-                                delay(2000) // 強制轉兩秒
+                                delay(2000)
                                 info = loadDebugInfo(context)
                                 isRefreshing = false
                             }

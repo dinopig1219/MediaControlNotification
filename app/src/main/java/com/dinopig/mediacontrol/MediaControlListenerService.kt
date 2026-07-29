@@ -171,12 +171,17 @@ class MediaControlListenerService : NotificationListenerService() {
         return sb.toString()
     }
 
-    private fun saveDebugInfo(state: PlaybackStateCompat) {
-        getSharedPreferences("debug_info", Context.MODE_PRIVATE)
-            .edit()
-            .putString("last_debug_info", buildDebugText(state))
-            .apply()
-    }
+    private fun saveDebugInfo(state: PlaybackStateCompat, metadata: MediaMetadataCompat?) {
+    val title = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "未知"
+    val artist = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "未知"
+    
+    getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+        .edit()
+        .putString("last_debug_info", buildDebugText(state))
+        .putString("current_song", title)
+        .putString("current_artist", artist)
+        .apply()
+}
 
     private fun showDebugNotification(state: PlaybackStateCompat) {
         val debugBuilder = NotificationCompat.Builder(this, CHANNEL_ID)

@@ -125,7 +125,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                         ) {
                             coroutineScope.launch {
                                 isRefreshing = true
-                                delay(2000)
+                                delay(1500)
                                 info = loadDebugInfo(context)
                                 isRefreshing = false
                             }

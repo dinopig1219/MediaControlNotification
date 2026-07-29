@@ -451,7 +451,7 @@ private fun AboutScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(logoHeightDp + 52.dp + 40.dp + 126.dp)
+                    .height(logoHeightDp + 52.dp + 40.dp + 110.dp)
                     .onSizeChanged { size -> onLogoSpacerHeightChanged(size.height) }
             )
         }

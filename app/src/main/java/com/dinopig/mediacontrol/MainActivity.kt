@@ -178,12 +178,14 @@ private fun AboutPage() {
             if (index > 0) 1f else (offset / logoHeightPx).coerceIn(0f, 1f)
         }
     }
-    
+
+    // ✨ 1. 最底層背景：使用跟 HomePage 一模一樣的 Scaffold 預設底色 (surface)
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MiuixTheme.colorScheme.background) 
+            .background(MiuixTheme.colorScheme.surface) 
     ) {
+        // ✨ 2. 特效層：隨著往上滑，彩色背景逐漸變透明，露出底下的 surface 淺灰色
         BgEffectBackground(
             dynamicBackground = true,
             modifier = Modifier
@@ -193,15 +195,16 @@ private fun AboutPage() {
                 }
         ) { }
 
+        // ✨ 3. 內容層
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
+                // ✨ 刪除所有手動 color 控制，讓 TopAppBar 完全發揮 Miuix 的原生能力！
+                // 這樣它推上去時的背景和動畫，就會跟 HomePage 百分之百一致！
                 TopAppBar(
                     title = "关于",
                     largeTitle = "",
-                    scrollBehavior = scrollBehavior,
-                    color = MiuixTheme.colorScheme.background.copy(alpha = scrollProgress),
-                    titleColor = MiuixTheme.colorScheme.onBackground.copy(alpha = scrollProgress)
+                    scrollBehavior = scrollBehavior
                 )
             }
         ) { padding ->
@@ -215,7 +218,6 @@ private fun AboutPage() {
         }
     }
 }
-
 
 @Composable
 private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {

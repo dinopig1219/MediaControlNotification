@@ -200,7 +200,10 @@ private fun AboutPage() {
                     title = "关于",
                     largeTitle = "",
                     scrollBehavior = scrollBehavior,
-                    color = Color.Transparent // ✨ 完璧歸趙：加回這個，讓它一開始是透明的，露出底下的特效層！
+                    color = Color.Transparent, 
+                    // ✨ 核心修復：強制將文字的透明度 (alpha) 和滑動進度 (scrollProgress) 綁定！
+                    // 這樣它就不會被 Miuix 的預設動畫覆蓋而瞬間出現，而是會像 InstallerX 一樣慢慢浮現
+                    titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
                 )
             }
         ) { padding ->

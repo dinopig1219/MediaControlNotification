@@ -349,58 +349,179 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                     }
                 )
 
+@OptIn(ExperimentalScrollBarApi::class)
+@Composable
+private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
+
+    var notificationGranted by remember { mutableStateOf(isNotificationPermissionGranted(context)) }
+    var listenerEnabled by remember { mutableStateOf(isNotificationListenerEnabled(context)) }
+    var notificationAskedBefore by remember {
+        mutableStateOf(prefs.getBoolean("notification_permission_asked", false))
+    }
+    var masterEnabled by remember {
+        mutableStateOf(
+            prefs.getBoolean("master_enabled", false) &&
+                isNotificationPermissionGranted(context) &&
+                isNotificationListenerEnabled(context)
+        )
+    }
+    var debugNotificationsOn by remember {
+        mutableStateOf(prefs.getBoolean("debug_notifications_enabled", false))
+    }
+
+    var hideRecentsEnabled by remember {
+        mutableStateOf(prefs.getBoolean("hide_recents_enabled", false))
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted -> notificationGranted = granted }
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                notificationGranted = isNotificationPermissionGranted(context)
+                listenerEnabled = isNotificationListenerEnabled(context)
+                if ((!notificationGranted || !listenerEnabled) && masterEnabled) {
+                    masterEnabled = false
+                    prefs.edit().putBoolean("master_enabled", false).apply()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    val scrollState = rememberScrollState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = padding.calculateTopPadding())
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .verticalScroll(scrollState),
+        ) {
+            SmallTitle(text = "总开关")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 SwitchPreference(
-                    title = "通知使用权",
-                    summary = if (listenerEnabled) "已授权" else "未授权，用于读取 Spotify 播放状态",
-                    checked = listenerEnabled,
-                    onCheckedChange = {
-                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                    }
-                )
-
-                ArrowPreference(
-                    title = "自启动（可选）",
-                    summary = "确保应用在后台可以持续运行",
-                    onClick = { openAppDetailsSettings(context) }
-                )
-
-                ArrowPreference(
-                    title = "省电策略（可选）",
-                    summary = "允许后台运行以保持服务更新",
-                    onClick = { openBatteryOptimizationSettings(context) }
-                )
-
-                SwitchPreference(
-                    title = "隐藏后台窗口",
-                    summary = "切换到后台时自动从最近任务中隐藏",
-                    checked = hideRecentsEnabled,
+                    title = "启用服务",
+                    summary = when {
+                        !notificationGranted || !listenerEnabled -> "需要先同时开启通知权限和通知使用权才能启用"
+                        masterEnabled -> "正在运行，Spotify 播放音乐时会生成通知"
+                        else -> "服务已关闭"
+                    },
+                    checked = masterEnabled,
                     onCheckedChange = { checked ->
-                        hideRecentsEnabled = checked
-                        prefs.edit().putBoolean("hide_recents_enabled", checked).apply()
+                        if (checked && (!notificationGranted || !listenerEnabled)) {
+                            when {
+                                !notificationGranted -> {
+                                    notificationAskedBefore = true
+                                    prefs.edit().putBoolean("notification_permission_asked", true).apply()
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                }
+                                !listenerEnabled -> {
+                                    context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                                }
+                            }
+                        } else {
+                            masterEnabled = checked
+                            prefs.edit().putBoolean("master_enabled", checked).apply()
+                        }
                     }
                 )
             }
-        }
 
-        SmallTitle(text = "日志")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            Column {
-                SwitchPreference(
-                    title = "显示调试通知",
-                    summary = "开启后本应用通知会多一条调试信息",
-                    checked = debugNotificationsOn,
-                    onCheckedChange = { checked ->
-                        debugNotificationsOn = checked
-                        prefs.edit().putBoolean("debug_notifications_enabled", checked).apply()
-                    }
-                )
+            SmallTitle(text = "权限设置")
 
-                ArrowPreference(
-                    title = "查看调试信息",
-                    onClick = { context.startActivity(Intent(context, DebugActivity::class.java)) }
-                )
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                Column {
+                    SwitchPreference(
+                        title = "通知权限",
+                        summary = if (notificationGranted) "已授权" else "未授权，用于本 App 生成通知",
+                        checked = notificationGranted,
+                        onCheckedChange = {
+                            if (!notificationAskedBefore) {
+                                notificationAskedBefore = true
+                                prefs.edit().putBoolean("notification_permission_asked", true).apply()
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    notificationGranted = true
+                                }
+                            } else {
+                                openAppDetailsSettings(context)
+                            }
+                        }
+                    )
+
+                    SwitchPreference(
+                        title = "通知使用权",
+                        summary = if (listenerEnabled) "已授权" else "未授权，用于读取 Spotify 播放状态",
+                        checked = listenerEnabled,
+                        onCheckedChange = {
+                            context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                        }
+                    )
+
+                    ArrowPreference(
+                        title = "自启动（可选）",
+                        summary = "确保应用在后台可以持续运行",
+                        onClick = { openAppDetailsSettings(context) }
+                    )
+
+                    ArrowPreference(
+                        title = "省电策略（可选）",
+                        summary = "允许后台运行以保持服务更新",
+                        onClick = { openBatteryOptimizationSettings(context) }
+                    )
+
+                    SwitchPreference(
+                        title = "隐藏后台窗口",
+                        summary = "切换到后台时自动从最近任务中隐藏",
+                        checked = hideRecentsEnabled,
+                        onCheckedChange = { checked ->
+                            hideRecentsEnabled = checked
+                            prefs.edit().putBoolean("hide_recents_enabled", checked).apply()
+                        }
+                    )
+                }
+            }
+
+            SmallTitle(text = "日志")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                Column {
+                    SwitchPreference(
+                        title = "显示调试通知",
+                        summary = "开启后本应用通知会多一条调试信息",
+                        checked = debugNotificationsOn,
+                        onCheckedChange = { checked ->
+                            debugNotificationsOn = checked
+                            prefs.edit().putBoolean("debug_notifications_enabled", checked).apply()
+                        }
+                    )
+
+                    ArrowPreference(
+                        title = "查看调试信息",
+                        onClick = { context.startActivity(Intent(context, DebugActivity::class.java)) }
+                    )
+                }
             }
         }
+
+        VerticalScrollBar(
+            adapter = rememberScrollBarAdapter(scrollState),
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+        )
     }
 }
 

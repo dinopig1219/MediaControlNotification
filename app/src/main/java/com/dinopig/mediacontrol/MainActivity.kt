@@ -356,8 +356,14 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
 
                 ArrowPreference(
                     title = "省电策略（可选）",
-                    summary = "允许后台运行以保持服务更新，避免服务被系统杀掉",
+                    summary = "允许后台运行以保持服务更新",
                     onClick = { openBatteryOptimizationSettings(context) }
+                )
+
+                ArrowPreference(
+                    title = "自启动（可选）",
+                    summary = "确保应用在后台可以持续运行",
+                    onClick = { openAppDetailsSettings(context) }
                 )
 
                 SwitchPreference(

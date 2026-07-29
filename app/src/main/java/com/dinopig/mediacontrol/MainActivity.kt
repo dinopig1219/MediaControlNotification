@@ -151,9 +151,10 @@ private fun HomePage() {
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
 
-    BgEffectBackground(
-        dynamicBackground = true,
-        modifier = Modifier.fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Red)
     ) {
         Scaffold(
             topBar = {

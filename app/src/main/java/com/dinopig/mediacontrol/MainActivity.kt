@@ -13,19 +13,20 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues // ✨ 補上
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn // ✨ 補上
-import androidx.compose.foundation.lazy.LazyListState // ✨ 補上
-import androidx.compose.foundation.lazy.rememberLazyListState // ✨ 補上
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -36,7 +37,7 @@ import top.yukonga.miuix.kmp.icon.extended.Home
 import top.yukonga.miuix.kmp.icon.extended.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf // ✨ 補上
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,9 +47,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer // ✨ 補上
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onSizeChanged // ✨ 補上
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
@@ -72,7 +73,6 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
-import top.yukonga.miuix.kmp.basic.SmallTopAppBar // ✨ 補上
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -152,7 +152,6 @@ private fun RootScreen() {
     }
 }
 
-// ⚠️ HomePage 絕對不修改，保留你原本乾淨的設定
 @Composable
 private fun HomePage() {
     val scrollBehavior = MiuixScrollBehavior()
@@ -167,11 +166,9 @@ private fun HomePage() {
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
     
-    // ✨ 追蹤滑動狀態
     val lazyListState = rememberLazyListState()
     var logoHeightPx by remember { mutableStateOf(0f) }
     
-    // ✨ 計算滾動進度，0f 是沒動，1f 是完全縮上去
     val scrollProgress by remember {
         derivedStateOf {
             if (logoHeightPx == 0f) return@derivedStateOf 0f
@@ -188,18 +185,16 @@ private fun AboutPage() {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                // ✨ 改用 SmallTopAppBar 手動控制，避免原生 TopAppBar 動畫衝突
-                SmallTopAppBar(
+                // 原汁原味的 TopAppBar + 漸變顏色
+                TopAppBar(
                     title = "关于",
+                    largeTitle = "",
                     scrollBehavior = scrollBehavior,
-                    // 背景色從透明漸變到 Surface (純色)
                     color = MiuixTheme.colorScheme.surface.copy(alpha = scrollProgress),
-                    // 標題字體從透明漸變到顯示
                     titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
                 )
             }
         ) { padding ->
-            // 把狀態傳下去
             AboutScreen(
                 scrollBehavior = scrollBehavior, 
                 padding = padding,
@@ -211,7 +206,6 @@ private fun AboutPage() {
     }
 }
 
-// ⚠️ HomeScreen 絕對不修改
 @Composable
 private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
     val context = LocalContext.current
@@ -355,7 +349,6 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
     }
 }
 
-// ✨ AboutScreen 改用 LazyColumn 支援滾動狀態
 @Composable
 private fun AboutScreen(
     scrollBehavior: ScrollBehavior, 
@@ -380,18 +373,15 @@ private fun AboutScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
     ) {
-        // ✨ 第一個 item：大標題 Logo 區塊
         item {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 32.dp, bottom = 20.dp)
-                    // 將實際高度回報給外層計算進度
                     .onSizeChanged { size -> 
                         onLogoHeightChanged(size.height.toFloat()) 
                     }
                     .graphicsLayer {
-                        // 隨著往上滑，透明度逐漸變成 0，大小微縮
                         alpha = 1f - scrollProgress
                         scaleX = 1f - (scrollProgress * 0.05f)
                         scaleY = 1f - (scrollProgress * 0.05f)
@@ -417,9 +407,14 @@ private fun AboutScreen(
             }
         }
 
-        // ✨ 之後的項目正常顯示，不套用特效
+        // ✨ 魔法在這裡：使用 fillParentMaxHeight() 讓內容區塊「至少佔滿整個螢幕高度」
+        // 這樣就算你只有兩張小卡片，捲動條也會有足夠的空間讓你把上方的 Logo 完全推出去！
         item {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillParentMaxHeight() 
+            ) {
                 SmallTitle(text = "关于")
                 Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                     Text(

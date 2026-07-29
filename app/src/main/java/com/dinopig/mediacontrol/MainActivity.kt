@@ -269,6 +269,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
         modifier = Modifier
             .fillMaxSize()
             .padding(top = padding.calculateTopPadding())
+            .scrollEndHaptic()
             .overScrollVertical()
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),

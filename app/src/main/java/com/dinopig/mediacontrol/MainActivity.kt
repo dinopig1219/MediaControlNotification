@@ -384,7 +384,7 @@ private fun AboutScreen(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = padding.calculateTopPadding() + 40.dp) 
+            .padding(top = padding.calculateTopPadding() + 64.dp) 
             .onSizeChanged { size -> 
                 with(density) { logoHeightDp = size.height.toDp() }
             },
@@ -449,7 +449,7 @@ private fun AboutScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(logoHeightDp + 70.dp) 
+                    .height(logoHeightDp + 130.dp) 
             )
         }
 

@@ -384,7 +384,7 @@ private fun AboutScreen(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = padding.calculateTopPadding() + 64.dp) 
+            .padding(top = padding.calculateTopPadding() + 40.dp) 
             .onSizeChanged { size -> 
                 with(density) { logoHeightDp = size.height.toDp() }
             },
@@ -445,13 +445,11 @@ private fun AboutScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
     ) {
-        
-        // ✨ 關鍵調整：採用 InstallerX 的高度公式，讓卡片往上拉高，身型跟右邊完全一致
         item(key = "logoSpacer") {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(logoHeightDp + 130.dp) 
+                    .height(logoHeightDp + 70.dp) 
             )
         }
 

@@ -34,8 +34,8 @@ import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
-import top.yukonga.miuix.kmp.basic.ProgressIndicator
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
@@ -66,7 +66,6 @@ private fun DebugScreen(onBack: () -> Unit) {
     val scrollBehavior = MiuixScrollBehavior()
     var info by remember { mutableStateOf(loadDebugInfo(context)) }
 
-    // ✨ 新增：用於控制轉圈圈動畫的狀態與協程
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -97,38 +96,39 @@ private fun DebugScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             
-            // ✨ 替換：帶有互動效果的 Miuix 風格標題列
+            // Miuix 風格標題列：左邊「信息輸出」，右邊「刷新」或「轉圈動畫」
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 28.dp), // 向內縮排，對齊下方的卡片邊緣
+                    .padding(end = 28.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SmallTitle(
                     text = "信息输出",
-                    modifier = Modifier.padding(bottom = 0.dp) // 取消預設底部間距，讓元素垂直置中
+                    modifier = Modifier.padding(bottom = 0.dp)
                 )
 
                 if (isRefreshing) {
-                    // 顯示轉圈動畫
-                    ProgressIndicator(
-                        modifier = Modifier.size(20.dp)
+                    // 使用官方正統的 InfiniteProgressIndicator 轉圈圈[span_2](start_span)[span_2](end_span)
+                    InfiniteProgressIndicator(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .align(Alignment.CenterVertically)
                     )
                 } else {
-                    // 顯示藍色刷新文字
                     Text(
                         text = "刷新",
-                        color = MiuixTheme.colorScheme.primary, // Miuix 主題強調色
+                        color = MiuixTheme.colorScheme.primary,
                         fontSize = 14.sp,
                         modifier = Modifier.clickable(
-                            indication = null, // 去除點擊時的方形水波紋，使其更像原生按鈕
+                            indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
                             coroutineScope.launch {
                                 isRefreshing = true
                                 delay(2000) // 強制轉兩秒
-                                info = loadDebugInfo(context) // 更新資料
+                                info = loadDebugInfo(context)
                                 isRefreshing = false
                             }
                         }

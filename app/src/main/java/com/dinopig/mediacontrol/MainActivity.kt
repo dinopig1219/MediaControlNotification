@@ -294,7 +294,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
             )
         }
 
-        SmallTitle(text = "通知")
+        SmallTitle(text = "权限设置")
 
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             Column {

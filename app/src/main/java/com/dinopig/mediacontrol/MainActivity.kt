@@ -178,27 +178,21 @@ private fun AboutPage() {
             if (index > 0) 1f else (offset / logoHeightPx).coerceIn(0f, 1f)
         }
     }
-
-    // ✨ 1. 最外層 Box：提供最底層的純色背景 (亮色模式為白，暗色模式為黑)
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MiuixTheme.colorScheme.background)
+            .background(MiuixTheme.colorScheme.background) 
     ) {
-        // ✨ 2. 背景特效層：將透明度與 scrollProgress 綁定！
         BgEffectBackground(
             dynamicBackground = true,
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    // 隨著往上滑，scrollProgress 變大，彩色漸變背景的透明度就會趨近於 0 (完全消失)
                     alpha = 1f - scrollProgress
                 }
-        ) {
-            // 裡面留空，不放任何元件，單純作為背景圖層
-        }
+        ) { }
 
-        // ✨ 3. 內容層：原本的 Scaffold 蓋在特效層上面
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
@@ -206,8 +200,8 @@ private fun AboutPage() {
                     title = "关于",
                     largeTitle = "",
                     scrollBehavior = scrollBehavior,
-                    color = MiuixTheme.colorScheme.surface.copy(alpha = scrollProgress),
-                    titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
+                    color = MiuixTheme.colorScheme.background.copy(alpha = scrollProgress),
+                    titleColor = MiuixTheme.colorScheme.onBackground.copy(alpha = scrollProgress)
                 )
             }
         ) { padding ->
@@ -221,6 +215,7 @@ private fun AboutPage() {
         }
     }
 }
+
 
 @Composable
 private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {

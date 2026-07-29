@@ -96,6 +96,13 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    override fun onStop() {
+        super.onStop()
+        val prefs = getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+        if (prefs.getBoolean("hide_recents_enabled", false)) {
+            finishAndRemoveTask()
+        }
+    }
 }
 
 private fun isNotificationPermissionGranted(context: Context): Boolean {

@@ -16,12 +16,16 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues // ✨ 補上
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn // ✨ 補上
+import androidx.compose.foundation.lazy.LazyListState // ✨ 補上
+import androidx.compose.foundation.lazy.rememberLazyListState // ✨ 補上
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -32,6 +36,7 @@ import top.yukonga.miuix.kmp.icon.extended.Home
 import top.yukonga.miuix.kmp.icon.extended.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf // ✨ 補上
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,7 +46,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer // ✨ 補上
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged // ✨ 補上
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
@@ -65,6 +72,7 @@ import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar // ✨ 補上
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -144,6 +152,7 @@ private fun RootScreen() {
     }
 }
 
+// ⚠️ HomePage 絕對不修改，保留你原本乾淨的設定
 @Composable
 private fun HomePage() {
     val scrollBehavior = MiuixScrollBehavior()
@@ -157,6 +166,20 @@ private fun HomePage() {
 @Composable
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
+    
+    // ✨ 追蹤滑動狀態
+    val lazyListState = rememberLazyListState()
+    var logoHeightPx by remember { mutableStateOf(0f) }
+    
+    // ✨ 計算滾動進度，0f 是沒動，1f 是完全縮上去
+    val scrollProgress by remember {
+        derivedStateOf {
+            if (logoHeightPx == 0f) return@derivedStateOf 0f
+            val index = lazyListState.firstVisibleItemIndex
+            val offset = lazyListState.firstVisibleItemScrollOffset
+            if (index > 0) 1f else (offset / logoHeightPx).coerceIn(0f, 1f)
+        }
+    }
 
     BgEffectBackground(
         dynamicBackground = true,
@@ -165,21 +188,32 @@ private fun AboutPage() {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                TopAppBar(
+                // ✨ 改用 SmallTopAppBar 手動控制，避免原生 TopAppBar 動畫衝突
+                SmallTopAppBar(
                     title = "关于",
-                    largeTitle = "",
                     scrollBehavior = scrollBehavior,
-                    color = Color.Transparent
+                    // 背景色從透明漸變到 Surface (純色)
+                    color = MiuixTheme.colorScheme.surface.copy(alpha = scrollProgress),
+                    // 標題字體從透明漸變到顯示
+                    titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
                 )
             }
         ) { padding ->
-            AboutScreen(scrollBehavior, padding)
+            // 把狀態傳下去
+            AboutScreen(
+                scrollBehavior = scrollBehavior, 
+                padding = padding,
+                lazyListState = lazyListState,
+                scrollProgress = scrollProgress,
+                onLogoHeightChanged = { logoHeightPx = it }
+            )
         }
     }
 }
 
+// ⚠️ HomeScreen 絕對不修改
 @Composable
-private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues) {
+private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
 
@@ -321,8 +355,15 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose
     }
 }
 
+// ✨ AboutScreen 改用 LazyColumn 支援滾動狀態
 @Composable
-private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compose.foundation.layout.PaddingValues) {
+private fun AboutScreen(
+    scrollBehavior: ScrollBehavior, 
+    padding: PaddingValues,
+    lazyListState: LazyListState,
+    scrollProgress: Float,
+    onLogoHeightChanged: (Float) -> Unit
+) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val packageInfo = remember {
@@ -331,61 +372,79 @@ private fun AboutScreen(scrollBehavior: ScrollBehavior, padding: androidx.compos
     val versionName = packageInfo.versionName ?: "未知"
     val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 
-    Column(
+    LazyColumn(
+        state = lazyListState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = padding.calculateTopPadding())
             .overScrollVertical()
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .verticalScroll(rememberScrollState()),
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
+        contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 32.dp, bottom = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = null,
+        // ✨ 第一個 item：大標題 Logo 區塊
+        item {
+            Column(
                 modifier = Modifier
-                    .size(96.dp)
-                    .clip(RoundedCornerShape(24.dp))
-            )
+                    .fillMaxWidth()
+                    .padding(top = 32.dp, bottom = 20.dp)
+                    // 將實際高度回報給外層計算進度
+                    .onSizeChanged { size -> 
+                        onLogoHeightChanged(size.height.toFloat()) 
+                    }
+                    .graphicsLayer {
+                        // 隨著往上滑，透明度逐漸變成 0，大小微縮
+                        alpha = 1f - scrollProgress
+                        scaleX = 1f - (scrollProgress * 0.05f)
+                        scaleY = 1f - (scrollProgress * 0.05f)
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(96.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "媒体控制通知",
-                style = MiuixTheme.textStyles.title1,
-                fontWeight = FontWeight.Bold
-            )
-            Text(text = "v$versionName ($versionCode)")
+                Text(
+                    text = "媒体控制通知",
+                    style = MiuixTheme.textStyles.title1,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(text = "v$versionName ($versionCode)")
+            }
         }
 
-        SmallTitle(text = "关于")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            Text(
-                text = "用一条独立的通知，把被 HyperOS 在媒体通知卡片隐藏掉的 Spotify 播放控件（智能随机播放 / 随机播放 / 收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-
-        SmallTitle(text = "链接")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            ArrowPreference(
-                title = "查看源码",
-                summary = "项目主页与更新日志",
-                endActions = {
+        // ✨ 之後的項目正常顯示，不套用特效
+        item {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                SmallTitle(text = "关于")
+                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                     Text(
-                        text = "GitHub",
-                        color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                        text = "用一条独立的通知，把被 HyperOS 在媒体通知卡片隐藏掉的 Spotify 播放控件（智能随机播放 / 随机播放 / 收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
+                        modifier = Modifier.padding(16.dp)
                     )
-                },
-                onClick = {
-                    uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
                 }
-            )
+
+                SmallTitle(text = "链接")
+                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                    ArrowPreference(
+                        title = "查看源码",
+                        summary = "项目主页与更新日志",
+                        endActions = {
+                            Text(
+                                text = "GitHub",
+                                color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                            )
+                        },
+                        onClick = {
+                            uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
+                        }
+                    )
+                }
+            }
         }
     }
 }

@@ -273,7 +273,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .verticalScroll(rememberScrollState()),
     ) {
-        SmallTitle(text = "开关")
+        SmallTitle(text = "总开关")
         Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
             SwitchPreference(
                 title = "启用服务",

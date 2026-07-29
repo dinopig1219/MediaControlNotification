@@ -91,6 +91,7 @@ import androidx.core.view.WindowCompat
 import top.yukonga.miuix.kmp.basic.VerticalScrollBar
 import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
+import androidx.compose.foundation.layout.fillMaxHeight
 
 class MainActivity : ComponentActivity() {
     

@@ -1,6 +1,7 @@
 package com.dinopig.mediacontrol
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -15,11 +16,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,11 +33,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Home
-import top.yukonga.miuix.kmp.icon.extended.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,20 +44,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.dinopig.mediacontrol.effect.BgEffectBackground
@@ -72,30 +73,44 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.ScrollBehavior
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.VerticalScrollBar
+import top.yukonga.miuix.kmp.basic.rememberScrollBarAdapter
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Home
+import top.yukonga.miuix.kmp.icon.extended.Info
+import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.preference.ArrowPreference
 import top.yukonga.miuix.kmp.preference.SwitchPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 
 class MainActivity : ComponentActivity() {
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val isDarkTheme = isSystemInDarkTheme()
+            val view = LocalView.current
+            
+            if (!view.isInEditMode) {
+                SideEffect {
+                    val window = (view.context as Activity).window
+                    WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDarkTheme
+                }
+            }
+
             MiuixTheme(
-                colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+                colors = if (isDarkTheme) darkColorScheme() else lightColorScheme()
             ) {
                 RootScreen()
             }
         }
     }
+    
     override fun onStop() {
         super.onStop()
         val prefs = getSharedPreferences("debug_info", Context.MODE_PRIVATE)
@@ -220,6 +235,7 @@ private fun AboutPage() {
     }
 }
 
+@OptIn(ExperimentalScrollBarApi::class)
 @Composable
 private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
     val context = LocalContext.current
@@ -265,119 +281,137 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = padding.calculateTopPadding())
-            .scrollEndHaptic()
-            .overScrollVertical()
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .verticalScroll(rememberScrollState()),
-    ) {
-        SmallTitle(text = "总开关")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            SwitchPreference(
-                title = "启用服务",
-                summary = when {
-                    !notificationGranted || !listenerEnabled -> "需要先同时开启通知权限和通知使用权才能启用"
-                    masterEnabled -> "正在运行，Spotify 播放音乐时会生成通知"
-                    else -> "服务已关闭"
-                },
-                checked = masterEnabled,
-                onCheckedChange = { checked ->
-                    if (checked && (!notificationGranted || !listenerEnabled)) {
-                        when {
-                            !notificationGranted -> {
+    val scrollState = rememberScrollState()
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = padding.calculateTopPadding())
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .verticalScroll(scrollState),
+        ) {
+            SmallTitle(text = "总开关")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                SwitchPreference(
+                    title = "启用服务",
+                    summary = when {
+                        !notificationGranted || !listenerEnabled -> "需要先同时开启通知权限和通知使用权才能启用"
+                        masterEnabled -> "正在运行，Spotify 播放音乐时会生成通知"
+                        else -> "服务已关闭"
+                    },
+                    checked = masterEnabled,
+                    onCheckedChange = { checked ->
+                        if (checked && (!notificationGranted || !listenerEnabled)) {
+                            when {
+                                !notificationGranted -> {
+                                    notificationAskedBefore = true
+                                    prefs.edit().putBoolean("notification_permission_asked", true).apply()
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                }
+                                !listenerEnabled -> {
+                                    context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                                }
+                            }
+                        } else {
+                            masterEnabled = checked
+                            prefs.edit().putBoolean("master_enabled", checked).apply()
+                        }
+                    }
+                )
+            }
+
+            SmallTitle(text = "权限设置")
+
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                Column {
+                    SwitchPreference(
+                        title = "通知权限",
+                        summary = if (notificationGranted) "已授权" else "未授权，用于本 App 生成通知",
+                        checked = notificationGranted,
+                        onCheckedChange = {
+                            if (!notificationAskedBefore) {
                                 notificationAskedBefore = true
                                 prefs.edit().putBoolean("notification_permission_asked", true).apply()
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                     permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    notificationGranted = true
                                 }
-                            }
-                            !listenerEnabled -> {
-                                context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                            }
-                        }
-                    } else {
-                        masterEnabled = checked
-                        prefs.edit().putBoolean("master_enabled", checked).apply()
-                    }
-                }
-            )
-        }
-
-        SmallTitle(text = "权限设置")
-
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            Column {
-                SwitchPreference(
-                    title = "通知权限",
-                    summary = if (notificationGranted) "已授权" else "未授权，用于本 App 生成通知",
-                    checked = notificationGranted,
-                    onCheckedChange = {
-                        if (!notificationAskedBefore) {
-                            notificationAskedBefore = true
-                            prefs.edit().putBoolean("notification_permission_asked", true).apply()
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                             } else {
-                                notificationGranted = true
+                                openAppDetailsSettings(context)
                             }
-                        } else {
-                            openAppDetailsSettings(context)
                         }
-                    }
-                )
+                    )
 
-                SwitchPreference(
-                    title = "通知使用权",
-                    summary = if (listenerEnabled) "已授权" else "未授权，用于读取 Spotify 播放状态",
-                    checked = listenerEnabled,
-                    onCheckedChange = {
-                        context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
-                    }
-                )
+                    SwitchPreference(
+                        title = "通知使用权",
+                        summary = if (listenerEnabled) "已授权" else "未授权，用于读取 Spotify 播放状态",
+                        checked = listenerEnabled,
+                        onCheckedChange = {
+                            context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                        }
+                    )
 
-                ArrowPreference(
-                    title = "省电策略（可选）",
-                    summary = "允许后台运行以保持服务更新，避免服务被系统杀掉",
-                    onClick = { openBatteryOptimizationSettings(context) }
-                )
+                    ArrowPreference(
+                        title = "自启动（可选）",
+                        summary = "确保应用在后台可以持续运行",
+                        onClick = { openAppDetailsSettings(context) }
+                    )
 
-                SwitchPreference(
-                    title = "隐藏后台窗口",
-                    summary = "切换到后台时自动从最近任务中隐藏",
-                    checked = hideRecentsEnabled,
-                    onCheckedChange = { checked ->
-                        hideRecentsEnabled = checked
-                        prefs.edit().putBoolean("hide_recents_enabled", checked).apply()
-                    }
-                )
+                    ArrowPreference(
+                        title = "省电策略（可选）",
+                        summary = "允许后台运行以保持服务更新",
+                        onClick = { openBatteryOptimizationSettings(context) }
+                    )
+
+                    SwitchPreference(
+                        title = "隐藏后台窗口",
+                        summary = "切换到后台时自动从最近任务中隐藏",
+                        checked = hideRecentsEnabled,
+                        onCheckedChange = { checked ->
+                            hideRecentsEnabled = checked
+                            prefs.edit().putBoolean("hide_recents_enabled", checked).apply()
+                        }
+                    )
+                }
+            }
+
+            SmallTitle(text = "日志")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                Column {
+                    SwitchPreference(
+                        title = "显示调试通知",
+                        summary = "开启后本应用通知会多一条调试信息",
+                        checked = debugNotificationsOn,
+                        onCheckedChange = { checked ->
+                            debugNotificationsOn = checked
+                            prefs.edit().putBoolean("debug_notifications_enabled", checked).apply()
+                        }
+                    )
+
+                    ArrowPreference(
+                        title = "查看调试信息",
+                        onClick = { context.startActivity(Intent(context, DebugActivity::class.java)) }
+                    )
+                }
             }
         }
 
-        SmallTitle(text = "日志")
-        Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-            Column {
-                SwitchPreference(
-                    title = "显示调试通知",
-                    summary = "开启后本应用通知会多一条调试信息",
-                    checked = debugNotificationsOn,
-                    onCheckedChange = { checked ->
-                        debugNotificationsOn = checked
-                        prefs.edit().putBoolean("debug_notifications_enabled", checked).apply()
-                    }
-                )
-
-                ArrowPreference(
-                    title = "查看调试信息",
-                    onClick = { context.startActivity(Intent(context, DebugActivity::class.java)) }
-                )
-            }
-        }
+        VerticalScrollBar(
+            adapter = rememberScrollBarAdapter(scrollState),
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+        )
     }
 }
 
+@OptIn(ExperimentalScrollBarApi::class)
 @Composable
 private fun AboutScreen(
     scrollBehavior: ScrollBehavior,
@@ -412,17 +446,18 @@ private fun AboutScreen(
                 .size(88.dp)
                 .graphicsLayer {
                     val iconProgress = ((scrollProgress - 0.35f) / 0.15f).coerceIn(0f, 1f)
+                    clip = true 
+                    shape = RoundedCornerShape(24.dp)
                     alpha = 1f - iconProgress
                     scaleX = 1f - (iconProgress * 0.05f)
                     scaleY = 1f - (iconProgress * 0.05f)
                 }
+                .background(Color.White)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
                 contentDescription = null,
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(24.dp))
+                modifier = Modifier.size(74.dp)
             )
         }
 
@@ -453,64 +488,72 @@ private fun AboutScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "v$versionName ($versionCode)",
+                text = "$versionName ($versionCode)",
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 fontSize = 14.sp
             )
         }
     }
 
-    LazyColumn(
-        state = lazyListState,
-        modifier = Modifier
-            .fillMaxSize()
-            .scrollEndHaptic()
-            .overScrollVertical()
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
-    ) {
-        item(key = "logoSpacer") {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(logoHeightDp + 52.dp + 40.dp + 82.dp)
-                    .onSizeChanged { size -> onLogoSpacerHeightChanged(size.height) }
-            )
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = lazyListState,
+            modifier = Modifier
+                .fillMaxSize()
+                .scrollEndHaptic()
+                .overScrollVertical()
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
+            contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
+        ) {
+            item(key = "logoSpacer") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(logoHeightDp + 52.dp + 40.dp + 82.dp)
+                        .onSizeChanged { size -> onLogoSpacerHeightChanged(size.height) }
+                )
+            }
 
-        item(key = "about_content") {
-            Column(
-                modifier = Modifier
-                    .fillParentMaxHeight()
-                    .padding(bottom = 16.dp)
-            ) {
-                SmallTitle(text = "链接")
-                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                    Column {
-                        ArrowPreference(
-                            title = "查看源码",
-                            summary = "项目主页与更新日志",
-                            endActions = {
-                                Text(
-                                    text = "GitHub",
-                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                                )
-                            },
-                            onClick = {
-                                uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
-                            }
-                        )
-                        
-                        ArrowPreference(
-                            title = "检查更新",
-                            summary = "检查软件版本更新和新功能",
-                            onClick = {
-                                uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification/releases")
-                            }
-                        )
+            item(key = "about_content") {
+                Column(
+                    modifier = Modifier
+                        .fillParentMaxHeight()
+                        .padding(bottom = 16.dp)
+                ) {
+                    SmallTitle(text = "链接")
+                    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                        Column {
+                            ArrowPreference(
+                                title = "查看源码",
+                                summary = "项目主页与更新日志",
+                                endActions = {
+                                    Text(
+                                        text = "GitHub",
+                                        color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                                    )
+                                },
+                                onClick = {
+                                    uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
+                                }
+                            )
+                            
+                            ArrowPreference(
+                                title = "检查更新",
+                                summary = "检查软件版本更新和新功能",
+                                onClick = {
+                                    uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification/releases")
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
+        VerticalScrollBar(
+            adapter = rememberScrollBarAdapter(lazyListState),
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+        )
     }
 }

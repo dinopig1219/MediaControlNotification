@@ -166,16 +166,17 @@ private fun HomePage() {
 @Composable
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
-    
     val lazyListState = rememberLazyListState()
-    var logoHeightPx by remember { mutableStateOf(0f) }
     
     val scrollProgress by remember {
         derivedStateOf {
-            if (logoHeightPx == 0f) return@derivedStateOf 0f
-            val index = lazyListState.firstVisibleItemIndex
-            val offset = lazyListState.firstVisibleItemScrollOffset
-            if (index > 0) 1f else (offset / logoHeightPx).coerceIn(0f, 1f)
+            if (lazyListState.firstVisibleItemIndex > 0) return@derivedStateOf 1f
+            val spacer = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "logoSpacer" }
+            if (spacer != null && spacer.size > 0) {
+                (lazyListState.firstVisibleItemScrollOffset.toFloat() / spacer.size).coerceIn(0f, 1f)
+            } else {
+                0f
+            }
         }
     }
 
@@ -201,8 +202,6 @@ private fun AboutPage() {
                     largeTitle = "",
                     scrollBehavior = scrollBehavior,
                     color = Color.Transparent, 
-                    // ✨ 核心修復：強制將文字的透明度 (alpha) 和滑動進度 (scrollProgress) 綁定！
-                    // 這樣它就不會被 Miuix 的預設動畫覆蓋而瞬間出現，而是會像 InstallerX 一樣慢慢浮現
                     titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
                 )
             }
@@ -211,8 +210,7 @@ private fun AboutPage() {
                 scrollBehavior = scrollBehavior, 
                 padding = padding,
                 lazyListState = lazyListState,
-                scrollProgress = scrollProgress,
-                onLogoHeightChanged = { logoHeightPx = it }
+                scrollProgress = scrollProgress
             )
         }
     }
@@ -366,8 +364,7 @@ private fun AboutScreen(
     scrollBehavior: ScrollBehavior, 
     padding: PaddingValues,
     lazyListState: LazyListState,
-    scrollProgress: Float,
-    onLogoHeightChanged: (Float) -> Unit
+    scrollProgress: Float
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -377,6 +374,64 @@ private fun AboutScreen(
     val versionName = packageInfo.versionName ?: "未知"
     val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 
+    val density = LocalDensity.current
+    var logoHeightDp by remember { mutableStateOf(0.dp) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = padding.calculateTopPadding() + 92.dp) 
+            .onSizeChanged { size -> 
+                with(density) { logoHeightDp = size.height.toDp() }
+            },
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(88.dp) 
+                .graphicsLayer {
+                    val iconProgress = ((scrollProgress - 0.35f) / 0.15f).coerceIn(0f, 1f)
+                    alpha = 1f - iconProgress
+                    scaleX = 1f - (iconProgress * 0.05f)
+                    scaleY = 1f - (iconProgress * 0.05f)
+                }
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(74.dp) 
+                    .clip(RoundedCornerShape(24.dp))
+            )
+        }
+
+        Text(
+            text = "媒体控制通知",
+            style = MiuixTheme.textStyles.title1,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier
+                .padding(top = 12.dp, bottom = 5.dp) 
+                .graphicsLayer {
+                    val projectNameProgress = ((scrollProgress - 0.20f) / 0.15f).coerceIn(0f, 1f)
+                    alpha = 1f - projectNameProgress
+                    scaleX = 1f - (projectNameProgress * 0.05f)
+                    scaleY = 1f - (projectNameProgress * 0.05f)
+                }
+        )
+        Text(
+            text = "v$versionName ($versionCode)",
+            color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+            fontSize = 14.sp,
+            modifier = Modifier.graphicsLayer {
+                val versionCodeProgress = ((scrollProgress - 0.05f) / 0.15f).coerceIn(0f, 1f)
+                alpha = 1f - versionCodeProgress
+                scaleX = 1f - (versionCodeProgress * 0.05f)
+                scaleY = 1f - (versionCodeProgress * 0.05f)
+            }
+        )
+    }
+
     LazyColumn(
         state = lazyListState,
         modifier = Modifier
@@ -385,69 +440,43 @@ private fun AboutScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         contentPadding = PaddingValues(top = padding.calculateTopPadding(), bottom = 16.dp)
     ) {
-        item {
-            Column(
+        
+        item(key = "logoSpacer") {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 32.dp, bottom = 20.dp)
-                    .onSizeChanged { size -> 
-                        onLogoHeightChanged(size.height.toFloat()) 
-                    }
-                    .graphicsLayer {
-                        alpha = 1f - scrollProgress
-                        scaleX = 1f - (scrollProgress * 0.05f)
-                        scaleY = 1f - (scrollProgress * 0.05f)
-                    },
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(96.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "媒体控制通知",
-                    style = MiuixTheme.textStyles.title1,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(text = "v$versionName ($versionCode)")
-            }
+                    .height(logoHeightDp + 218.dp) 
+            )
         }
 
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillParentMaxHeight() 
-            ) {
-                SmallTitle(text = "关于")
-                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                    Text(
-                        text = "用一条独立的通知，把被 HyperOS 在媒体通知卡片隐藏掉的 Spotify 播放控件（智能随机播放 / 随机播放 / 收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
+        item(key = "about") {
+            Box {
+                Spacer(Modifier.fillParentMaxHeight()) 
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    SmallTitle(text = "关于")
+                    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                        Text(
+                            text = "用一条独立的通知，把被 HyperOS 在媒体通知卡片隐藏掉的 Spotify 播放控件（智能随机播放 / 随机播放 / 收藏等）重新显示出来，点击后直接转发给 Spotify 本体。",
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
 
-                SmallTitle(text = "链接")
-                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                    ArrowPreference(
-                        title = "查看源码",
-                        summary = "项目主页与更新日志",
-                        endActions = {
-                            Text(
-                                text = "GitHub",
-                                color = MiuixTheme.colorScheme.onSurfaceVariantActions
-                            )
-                        },
-                        onClick = {
-                            uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
-                        }
-                    )
+                    SmallTitle(text = "链接")
+                    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                        ArrowPreference(
+                            title = "查看源码",
+                            summary = "项目主页与更新日志",
+                            endActions = {
+                                Text(
+                                    text = "GitHub",
+                                    color = MiuixTheme.colorScheme.onSurfaceVariantActions
+                                )
+                            },
+                            onClick = {
+                                uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification")
+                            }
+                        )
+                    }
                 }
             }
         }

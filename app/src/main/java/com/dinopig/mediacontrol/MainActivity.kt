@@ -370,14 +370,6 @@ private fun AboutScreen(
     scrollProgress: Float
 ) {
     val context = LocalContext.current
-@Composable
-private fun AboutScreen(
-    scrollBehavior: ScrollBehavior, 
-    padding: PaddingValues,
-    lazyListState: LazyListState,
-    scrollProgress: Float
-) {
-    val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
     val packageInfo = remember {
         context.packageManager.getPackageInfo(context.packageName, 0)

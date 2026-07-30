@@ -172,7 +172,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                 SelectionContainer {
                     Text(
                         text = debugData.logInfo,
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         modifier = Modifier.padding(16.dp)
                     )
                 }

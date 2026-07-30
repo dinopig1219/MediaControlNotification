@@ -264,11 +264,24 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
 
     var currentSong by remember { mutableStateOf(prefs.getString("current_song", "未知") ?: "未知") }
     var currentArtist by remember { mutableStateOf(prefs.getString("current_artist", "未知") ?: "未知") }
+    
+    var debugInfo by remember { mutableStateOf(prefs.getString("last_debug_info", "") ?: "") }
+
+    val currentPackage by remember {
+        derivedStateOf {
+            if (debugInfo.contains("包名: ")) {
+                debugInfo.substringAfter("包名: ").substringBefore("\n").trim()
+            } else {
+                "暂无信息"
+            }
+        }
+    }
 
     DisposableEffect(Unit) {
         val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             if (key == "current_song") currentSong = sharedPreferences.getString("current_song", "未知") ?: "未知"
             if (key == "current_artist") currentArtist = sharedPreferences.getString("current_artist", "未知") ?: "未知"
+            if (key == "last_debug_info") debugInfo = sharedPreferences.getString("last_debug_info", "") ?: ""
         }
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
@@ -339,11 +352,17 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
             }
 
             if (masterEnabled) {
-                SmallTitle(text = "当前播放状态")
+                SmallTitle(text = "信息")
                 Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                     BasicComponent(
                         title = currentSong,
                         summary = currentArtist
+                    )
+                }
+                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                    BasicComponent(
+                        title = "播放器包名",
+                        summary = currentPackage
                     )
                 }
             }

@@ -262,8 +262,8 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
         mutableStateOf(prefs.getBoolean("hide_recents_enabled", false))
     }
 
-    var currentSong by remember { mutableStateOf(prefs.getString("current_song", "未知") ?: "未知") }
-    var currentArtist by remember { mutableStateOf(prefs.getString("current_artist", "未知") ?: "未知") }
+    var currentSong by remember { mutableStateOf(prefs.getString("current_song", "暂未获取到歌名") ?: "暂未获取到歌名") }
+    var currentArtist by remember { mutableStateOf(prefs.getString("current_artist", "暂未获取到歌手") ?: "暂未获取到歌手") }
     var debugInfo by remember { mutableStateOf(prefs.getString("last_debug_info", "") ?: "") }
 
     val currentPackage by remember {
@@ -298,8 +298,8 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
 
     DisposableEffect(Unit) {
         val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-            if (key == "current_song") currentSong = sharedPreferences.getString("current_song", "未知") ?: "未知"
-            if (key == "current_artist") currentArtist = sharedPreferences.getString("current_artist", "未知") ?: "未知"
+            if (key == "current_song") currentSong = sharedPreferences.getString("current_song", "暂未获取到歌名") ?: "暂未获取到歌名"
+            if (key == "current_artist") currentArtist = sharedPreferences.getString("current_artist", "暂未获取到歌手") ?: "暂未获取到歌手"
             if (key == "last_debug_info") debugInfo = sharedPreferences.getString("last_debug_info", "") ?: ""
         }
         prefs.registerOnSharedPreferenceChangeListener(listener)

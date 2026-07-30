@@ -82,7 +82,23 @@ class MediaControlListenerService : NotificationListenerService() {
     }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {}
-    override fun onNotificationRemoved(sbn: StatusBarNotification?) {}
+    
+    override fun onNotificationRemoved(sbn: StatusBarNotification?) {
+        super.onNotificationRemoved(sbn)
+        
+        if (sbn?.packageName in TARGET_PACKAGES) {
+            
+            getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+                .edit()
+                .putString("current_song", "暂未获取到歌名")
+                .putString("current_artist", "暂未获取到歌手")
+                .putString("last_debug_info", "")
+                .apply()
+                
+            cancelNotification()
+            activeController = null
+        }
+    }
 
     private fun pickController(controllers: List<android.media.session.MediaController>?) {
         activeController?.unregisterCallback(controllerCallback)

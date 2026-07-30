@@ -87,6 +87,7 @@ import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.basic.BasicComponent
 
 class MainActivity : ComponentActivity() {
     
@@ -261,6 +262,18 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
         mutableStateOf(prefs.getBoolean("hide_recents_enabled", false))
     }
 
+    var currentSong by remember { mutableStateOf(prefs.getString("current_song", "未知") ?: "未知") }
+    var currentArtist by remember { mutableStateOf(prefs.getString("current_artist", "未知") ?: "未知") }
+
+    DisposableEffect(Unit) {
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            if (key == "current_song") currentSong = sharedPreferences.getString("current_song", "未知") ?: "未知"
+            if (key == "current_artist") currentArtist = sharedPreferences.getString("current_artist", "未知") ?: "未知"
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted -> notificationGranted = granted }
@@ -324,6 +337,22 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                     }
                 )
             }
+
+            if (masterEnabled) {
+                SmallTitle(text = "当前播放状态")
+                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                    BasicComponent(
+                        title = currentSong,
+                        summary = currentArtist
+                    )
+                }
+            }
+
+            // 下面繼續接原本的權限設置
+            SmallTitle(text = "权限设置")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                // ...
+
 
             SmallTitle(text = "权限设置")
 

@@ -47,6 +47,7 @@ import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.basic.BasicComponent
+import androidx.compose.runtime.DisposableEffect
 
 data class DebugData(
     val logInfo: String,
@@ -73,6 +74,17 @@ private fun DebugScreen(onBack: () -> Unit) {
     val scrollBehavior = MiuixScrollBehavior()
     
     var debugData by remember { mutableStateOf(loadDebugInfo(context)) }
+    DisposableEffect(Unit) {
+        val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == "current_song" || key == "current_artist" || key == "last_debug_info") {
+                debugData = loadDebugInfo(context)
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+    
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 

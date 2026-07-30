@@ -409,17 +409,6 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                 }
             }
 
-            SmallTitle(text = "功能设置")
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                Column {
-                    ArrowPreference(
-                        title = "查看调试信息",
-                        onClick = { context.startActivity(Intent(context, OrderActivity::class.java)) }
-                    )
-                }
-            }
-        }
-
             SmallTitle(text = "权限设置")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {

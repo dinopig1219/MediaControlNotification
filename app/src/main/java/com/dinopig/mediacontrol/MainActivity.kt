@@ -264,7 +264,6 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
 
     var currentSong by remember { mutableStateOf(prefs.getString("current_song", "未知") ?: "未知") }
     var currentArtist by remember { mutableStateOf(prefs.getString("current_artist", "未知") ?: "未知") }
-    
     var debugInfo by remember { mutableStateOf(prefs.getString("last_debug_info", "") ?: "") }
 
     val currentPackage by remember {
@@ -272,8 +271,28 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
             if (debugInfo.contains("包名: ")) {
                 debugInfo.substringAfter("包名: ").substringBefore("\n").trim()
             } else {
-                "暂无信息"
+                "暂未获取到信息"
             }
+        }
+    }
+
+    val customAction1 by remember {
+        derivedStateOf {
+            if (debugInfo.contains("name=")) {
+                debugInfo.substringAfter("name=").substringBefore("\n").trim()
+            } else "暂未获取到信息"
+        }
+    }
+
+    val customAction2 by remember {
+        derivedStateOf {
+            val firstIndex = debugInfo.indexOf("name=")
+            if (firstIndex != -1) {
+                val afterFirst = debugInfo.substring(firstIndex + 5)
+                if (afterFirst.contains("name=")) {
+                    afterFirst.substringAfter("name=").substringBefore("\n").trim()
+                } else "暂未获取到信息"
+            } else "暂未获取到信息"
         }
     }
 
@@ -354,16 +373,24 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
             if (masterEnabled) {
                 SmallTitle(text = "信息")
                 Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                    BasicComponent(
-                        title = currentSong,
-                        summary = currentArtist
-                    )
-                }
-                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                    BasicComponent(
-                        title = "播放器包名",
-                        summary = currentPackage
-                    )
+                    Column {
+                        BasicComponent(
+                            title = currentSong,
+                            summary = currentArtist
+                        )
+                        BasicComponent(
+                            title = "播放器包名",
+                            summary = currentPackage
+                        )
+                        BasicComponent(
+                            title = "自定义动作1",
+                            summary = customAction1
+                        )
+                        BasicComponent(
+                            title = "自定义动作2",
+                            summary = customAction2
+                        )
+                    }
                 }
             }
 

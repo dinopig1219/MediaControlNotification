@@ -87,6 +87,17 @@ import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import androidx.compose.ui.graphics.BlendMode
+import top.yukonga.miuix.kmp.blur.BlendColorEntry
+import top.yukonga.miuix.kmp.blur.BlurBlendMode
+import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.BlurDefaults
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.blur.textureBlur
 
 class MainActivity : ComponentActivity() {
     
@@ -194,6 +205,8 @@ private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
     val lazyListState = rememberLazyListState()
     var logoSpacerHeightPx by remember { mutableStateOf(0) }
+    val backdrop = rememberLayerBackdrop()
+    val blurSupported = remember { isRuntimeShaderSupported() }
 
     val scrollProgress by remember {
         derivedStateOf {
@@ -210,6 +223,7 @@ private fun AboutPage() {
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { alpha = 1f - scrollProgress }
+                .layerBackdrop(backdrop)
         ) { }
 
         Scaffold(
@@ -229,7 +243,9 @@ private fun AboutPage() {
                 padding = padding,
                 lazyListState = lazyListState,
                 scrollProgress = scrollProgress,
-                onLogoSpacerHeightChanged = { logoSpacerHeightPx = it }
+                onLogoSpacerHeightChanged = { logoSpacerHeightPx = it },
+                backdrop = backdrop,
+                blurSupported = blurSupported
             )
         }
     }
@@ -259,6 +275,50 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
 
     var hideRecentsEnabled by remember {
         mutableStateOf(prefs.getBoolean("hide_recents_enabled", false))
+    }
+
+    var currentSong by remember { mutableStateOf(prefs.getString("current_song", "暂未获取到歌名") ?: "暂未获取到歌名") }
+    var currentArtist by remember { mutableStateOf(prefs.getString("current_artist", "暂未获取到歌手") ?: "暂未获取到歌手") }
+    var debugInfo by remember { mutableStateOf(prefs.getString("last_debug_info", "") ?: "") }
+
+    val currentPackage by remember {
+        derivedStateOf {
+            if (debugInfo.contains("包名: ")) {
+                debugInfo.substringAfter("包名: ").substringBefore("\n").trim()
+            } else {
+                "暂未获取到信息"
+            }
+        }
+    }
+
+    val customAction1 by remember {
+        derivedStateOf {
+            if (debugInfo.contains("name=")) {
+                debugInfo.substringAfter("name=").substringBefore("\n").trim()
+            } else "暂未获取到信息"
+        }
+    }
+
+    val customAction2 by remember {
+        derivedStateOf {
+            val firstIndex = debugInfo.indexOf("name=")
+            if (firstIndex != -1) {
+                val afterFirst = debugInfo.substring(firstIndex + 5)
+                if (afterFirst.contains("name=")) {
+                    afterFirst.substringAfter("name=").substringBefore("\n").trim()
+                } else "暂未获取到信息"
+            } else "暂未获取到信息"
+        }
+    }
+
+    DisposableEffect(Unit) {
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            if (key == "current_song") currentSong = sharedPreferences.getString("current_song", "暂未获取到歌名") ?: "暂未获取到歌名"
+            if (key == "current_artist") currentArtist = sharedPreferences.getString("current_artist", "暂未获取到歌手") ?: "暂未获取到歌手"
+            if (key == "last_debug_info") debugInfo = sharedPreferences.getString("last_debug_info", "") ?: ""
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -325,8 +385,31 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                 )
             }
 
-            SmallTitle(text = "权限设置")
+            if (masterEnabled) {
+                SmallTitle(text = "信息")
+                Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                    Column {
+                        BasicComponent(
+                            title = currentSong,
+                            summary = currentArtist
+                        )
+                        BasicComponent(
+                            title = "播放器包名",
+                            summary = currentPackage
+                        )
+                        BasicComponent(
+                            title = "自定义动作1",
+                            summary = customAction1
+                        )
+                        BasicComponent(
+                            title = "自定义动作2",
+                            summary = customAction2
+                        )
+                    }
+                }
+            }
 
+            SmallTitle(text = "权限设置")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     SwitchPreference(
@@ -418,7 +501,9 @@ private fun AboutScreen(
     padding: PaddingValues,
     lazyListState: LazyListState,
     scrollProgress: Float,
-    onLogoSpacerHeightChanged: (Int) -> Unit
+    onLogoSpacerHeightChanged: (Int) -> Unit,
+    backdrop: LayerBackdrop,
+    blurSupported: Boolean
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -429,6 +514,20 @@ private fun AboutScreen(
     val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 
     val density = LocalDensity.current
+    val isDark = isSystemInDarkTheme()
+    val logoBlend = remember(isDark) {
+        if (isDark) {
+            listOf(
+                BlendColorEntry(Color(0xe6a1a1a1), BlurBlendMode.ColorDodge),
+                BlendColorEntry(Color(0x4de6e6e6), BlurBlendMode.LinearLight),
+            )
+        } else {
+            listOf(
+                BlendColorEntry(Color(0xcc4a4a4a), BlurBlendMode.ColorBurn),
+                BlendColorEntry(Color(0xff4f4f4f), BlurBlendMode.LinearLight),
+            )
+        }
+    }
     var logoHeightDp by remember { mutableStateOf(0.dp) }
 
     Column(
@@ -474,6 +573,18 @@ private fun AboutScreen(
                     scaleX = 1f - (projectNameProgress * 0.05f)
                     scaleY = 1f - (projectNameProgress * 0.05f)
                 }
+                .then(
+                    if (blurSupported) {
+                        Modifier.textureBlur(
+                            backdrop = backdrop,
+                            shape = RoundedCornerShape(16.dp),
+                            blurRadius = 150f,
+                            noiseCoefficient = BlurDefaults.NoiseCoefficient,
+                            colors = BlurColors(blendColors = logoBlend),
+                            contentBlendMode = BlendMode.DstIn,
+                        )
+                    } else Modifier
+                )
         )
 
         Column(

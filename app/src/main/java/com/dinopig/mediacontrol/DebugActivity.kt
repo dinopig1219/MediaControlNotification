@@ -49,6 +49,10 @@ import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.foundation.layout.Box
+import android.app.Activity
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 data class DebugData(
     val logInfo: String,
@@ -60,8 +64,18 @@ class DebugActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val isDarkTheme = isSystemInDarkTheme()
+            val view = LocalView.current
+
+            if (!view.isInEditMode) {
+                SideEffect {
+                    val window = (view.context as Activity).window
+                    WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDarkTheme
+                }
+            }
+
             MiuixTheme(
-                colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+                colors = if (isDarkTheme) darkColorScheme() else lightColorScheme()
             ) {
                 DebugScreen(onBack = { finish() })
             }
@@ -158,7 +172,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                 SelectionContainer {
                     Text(
                         text = debugData.logInfo,
-                        fontSize = 14.sp,
+                        fontSize = 15.sp,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
@@ -171,8 +185,8 @@ private fun DebugScreen(onBack: () -> Unit) {
 private fun loadDebugInfo(context: Context): DebugData {
     val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
     val info = prefs.getString("last_debug_info", null) ?: "还没有数据。请先播放 Spotify，确保已授权通知使用权。"
-    val song = prefs.getString("current_song", "未知") ?: "未知"
-    val artist = prefs.getString("current_artist", "未知") ?: "未知"
+    val song = prefs.getString("current_song", "暂未获取到歌名") ?: "暂未获取到歌名"
+    val artist = prefs.getString("current_artist", "暂未获取到歌手") ?: "歌手"
     
     return DebugData(logInfo = info, song = song, artist = artist)
 }

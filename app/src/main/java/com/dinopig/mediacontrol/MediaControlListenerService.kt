@@ -92,7 +92,7 @@ class MediaControlListenerService : NotificationListenerService() {
                 .edit()
                 .putString("current_song", "暂未获取到歌名")
                 .putString("current_artist", "暂未获取到歌手")
-                .putString("last_debug_info", "")
+                .putString("last_debug_info", "还没有数据。请先播放 Spotify，确保已授权通知使用权。")
                 .apply()
                 
             cancelNotification()

@@ -132,8 +132,8 @@ private fun DebugScreen(onBack: () -> Unit) {
                 } else {
                     Text(
                         text = "刷新",
+                        style = MiuixTheme.textStyles.subtitle,
                         color = MiuixTheme.colorScheme.primary,
-                        fontSize = 14.sp,
                         modifier = Modifier.clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }

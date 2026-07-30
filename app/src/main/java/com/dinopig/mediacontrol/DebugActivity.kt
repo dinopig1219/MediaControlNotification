@@ -165,6 +165,7 @@ private fun DebugScreen(onBack: () -> Unit) {
             }
         }
     }
+}
 
 
 private fun loadDebugInfo(context: Context): DebugData {

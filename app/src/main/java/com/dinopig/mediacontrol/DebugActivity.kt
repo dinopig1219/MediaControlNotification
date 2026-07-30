@@ -115,7 +115,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                 .padding(bottom = padding.calculateBottomPadding())
         ) {
             
-            SmallTitle(text = "当前播放状态")
+            SmallTitle(text = "当前播放")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 BasicComponent(
                     title = debugData.song,

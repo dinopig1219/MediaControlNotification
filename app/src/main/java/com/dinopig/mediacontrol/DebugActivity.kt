@@ -118,11 +118,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SmallTitle(
-                    text = "信息输出",
-                    modifier = Modifier.padding(bottom = 0.dp)
-                )
-
+                SmallTitle(text = "信息输出")
                 if (isRefreshing) {
                     InfiniteProgressIndicator(
                         modifier = Modifier

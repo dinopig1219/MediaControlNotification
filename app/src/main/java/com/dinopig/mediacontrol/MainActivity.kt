@@ -348,14 +348,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                 }
             }
 
-            // 下面繼續接原本的權限設置
             SmallTitle(text = "权限设置")
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                // ...
-
-
-            SmallTitle(text = "权限设置")
-
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     SwitchPreference(

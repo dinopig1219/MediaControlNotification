@@ -188,8 +188,8 @@ class MediaControlListenerService : NotificationListenerService() {
     }
 
     private fun saveDebugInfo(state: PlaybackStateCompat, metadata: MediaMetadataCompat?) {
-    val title = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "未知"
-    val artist = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "未知"
+    val title = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "暂未获取到歌名"
+    val artist = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "暂未获取到歌手"
     
     getSharedPreferences("debug_info", Context.MODE_PRIVATE)
         .edit()

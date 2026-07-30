@@ -172,7 +172,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                 SelectionContainer {
                     Text(
                         text = debugData.logInfo,
-                        fontSize = 14.sp,
+                        fontSize = 16.sp,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
@@ -185,8 +185,8 @@ private fun DebugScreen(onBack: () -> Unit) {
 private fun loadDebugInfo(context: Context): DebugData {
     val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
     val info = prefs.getString("last_debug_info", null) ?: "还没有数据。请先播放 Spotify，确保已授权通知使用权。"
-    val song = prefs.getString("current_song", "未知") ?: "未知"
-    val artist = prefs.getString("current_artist", "未知") ?: "未知"
+    val song = prefs.getString("current_song", "暂未获取到歌名") ?: "暂未获取到歌名"
+    val artist = prefs.getString("current_artist", "暂未获取到歌手") ?: "歌手"
     
     return DebugData(logInfo = info, song = song, artist = artist)
 }

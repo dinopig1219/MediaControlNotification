@@ -89,7 +89,7 @@ private fun DebugScreen(onBack: () -> Unit) {
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    Scaffold(
+        Scaffold(
         topBar = {
             TopAppBar(
                 title = "调试信息",
@@ -108,12 +108,11 @@ private fun DebugScreen(onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding() - 4.dp) 
+                .padding(top = padding.calculateTopPadding()) 
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = padding.calculateBottomPadding()),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(bottom = padding.calculateBottomPadding())
         ) {
             
             SmallTitle(text = "当前播放状态")
@@ -166,7 +165,7 @@ private fun DebugScreen(onBack: () -> Unit) {
             }
         }
     }
-}
+
 
 private fun loadDebugInfo(context: Context): DebugData {
     val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)

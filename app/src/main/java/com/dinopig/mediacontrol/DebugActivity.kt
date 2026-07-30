@@ -46,6 +46,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.basic.BasicComponent
 
 data class DebugData(
     val logInfo: String,
@@ -104,24 +105,10 @@ private fun DebugScreen(onBack: () -> Unit) {
             
             SmallTitle(text = "当前播放状态")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 14.dp)
-                ) {
-                    Text(
-                        text = "歌曲信息",
-                        fontSize = 16.sp,
-                        color = MiuixTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "歌曲：${debugData.song}\n歌手：${debugData.artist}",
-                        fontSize = 14.sp,
-                        color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
-                        modifier = Modifier.padding(top = 4.dp),
-                        lineHeight = 20.sp
-                    )
-                }
+                BasicComponent(
+                    title = debugData.song,
+                    summary = debugData.artist
+                )
             }
 
             Row(

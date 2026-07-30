@@ -189,7 +189,7 @@ class MediaControlListenerService : NotificationListenerService() {
             sb.append("  (无)\n")
         } else {
             state.customActions.forEach {
-                sb.append("  name=${it.name}\n  action=${it.action}\n  icon=${it.icon}\n")
+                sb.append("  name=${it.name}\n  action=${it.action}\n  icon=${it.icon}\n\n")
             }
         }
         return sb.toString()

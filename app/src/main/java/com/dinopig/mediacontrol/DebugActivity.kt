@@ -48,6 +48,7 @@ import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.basic.BasicComponent
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.foundation.layout.Box
 
 data class DebugData(
     val logInfo: String,
@@ -123,37 +124,34 @@ private fun DebugScreen(onBack: () -> Unit) {
                 )
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 28.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
                 SmallTitle(text = "信息输出")
-                if (isRefreshing) {
-                    InfiniteProgressIndicator(
-                        modifier = Modifier
-                            .size(20.dp)
-                            .align(Alignment.CenterVertically)
-                    )
-                } else {
-                    Text(
-                        text = "刷新",
-                        style = MiuixTheme.textStyles.subtitle,
-                        color = MiuixTheme.colorScheme.primary,
-                        modifier = Modifier.clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            coroutineScope.launch {
-                                isRefreshing = true
-                                delay(1500)
-                                debugData = loadDebugInfo(context)
-                                isRefreshing = false
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 28.dp)
+                ) {
+                    if (isRefreshing) {
+                        InfiniteProgressIndicator(modifier = Modifier.size(20.dp))
+                    } else {
+                        Text(
+                            text = "刷新",
+                            style = MiuixTheme.textStyles.subtitle,
+                            color = MiuixTheme.colorScheme.primary,
+                            modifier = Modifier.clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                coroutineScope.launch {
+                                    isRefreshing = true
+                                    delay(1500)
+                                    debugData = loadDebugInfo(context)
+                                    isRefreshing = false
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
 

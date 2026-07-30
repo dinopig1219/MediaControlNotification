@@ -4,39 +4,57 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import top.yukonga.miuix.kmp.icon.MiuixIcons
-import top.yukonga.miuix.kmp.icon.extended.Back
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.IconButton
+import top.yukonga.miuix.kmp.basic.InfiniteProgressIndicator
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
+import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
-import top.yukonga.miuix.kmp.basic.TextButton
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.icon.MiuixIcons
+import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.basic.BasicComponent
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.foundation.layout.Box
+
+data class DebugData(
+    val logInfo: String,
+    val song: String,
+    val artist: String
+)
 
 class DebugActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,9 +73,23 @@ class DebugActivity : ComponentActivity() {
 private fun DebugScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scrollBehavior = MiuixScrollBehavior()
-    var info by remember { mutableStateOf(loadDebugInfo(context)) }
+    
+    var debugData by remember { mutableStateOf(loadDebugInfo(context)) }
+    DisposableEffect(Unit) {
+        val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == "current_song" || key == "current_artist" || key == "last_debug_info") {
+                debugData = loadDebugInfo(context)
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+    
+    var isRefreshing by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
-    Scaffold(
+        Scaffold(
         topBar = {
             TopAppBar(
                 title = "调试信息",
@@ -76,23 +108,56 @@ private fun DebugScreen(onBack: () -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = padding.calculateTopPadding())
+                .padding(top = padding.calculateTopPadding()) 
                 .overScrollVertical()
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = padding.calculateBottomPadding()),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(bottom = padding.calculateBottomPadding())
         ) {
-            TextButton(
-                text = "刷新",
-                onClick = { info = loadDebugInfo(context) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
-            )
+            
+            SmallTitle(text = "当前播放")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                BasicComponent(
+                    title = debugData.song,
+                    summary = debugData.artist
+                )
+            }
 
-            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)) {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                SmallTitle(text = "信息输出")
+
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 28.dp)
+                ) {
+                    if (isRefreshing) {
+                        InfiniteProgressIndicator(modifier = Modifier.size(20.dp))
+                    } else {
+                        Text(
+                            text = "刷新",
+                            style = MiuixTheme.textStyles.subtitle,
+                            color = MiuixTheme.colorScheme.primary,
+                            modifier = Modifier.clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                coroutineScope.launch {
+                                    isRefreshing = true
+                                    delay(1500)
+                                    debugData = loadDebugInfo(context)
+                                    isRefreshing = false
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 SelectionContainer {
                     Text(
-                        text = info,
+                        text = debugData.logInfo,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -102,8 +167,12 @@ private fun DebugScreen(onBack: () -> Unit) {
     }
 }
 
-private fun loadDebugInfo(context: Context): String {
-    val info = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
-        .getString("last_debug_info", null)
-    return info ?: "还没有数据。请先播放 Spotify，确保已授权通知使用权。"
+
+private fun loadDebugInfo(context: Context): DebugData {
+    val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+    val info = prefs.getString("last_debug_info", null) ?: "还没有数据。请先播放 Spotify，确保已授权通知使用权。"
+    val song = prefs.getString("current_song", "未知") ?: "未知"
+    val artist = prefs.getString("current_artist", "未知") ?: "未知"
+    
+    return DebugData(logInfo = info, song = song, artist = artist)
 }

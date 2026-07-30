@@ -27,6 +27,11 @@
             android:exported="false"
             android:label="调试信息" />
 
+        <activity 
+            android:name=".OrderActivity"
+            android:exported="false"
+            android:label="调整按键顺序" />
+
         <service
             android:name=".MediaControlListenerService"
             android:label="媒体控制通知"

@@ -88,6 +88,16 @@ import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.utils.scrollEndHaptic
 import top.yukonga.miuix.kmp.basic.BasicComponent
+import androidx.compose.ui.graphics.BlendMode
+import top.yukonga.miuix.kmp.blur.BlendColorEntry
+import top.yukonga.miuix.kmp.blur.BlurBlendMode
+import top.yukonga.miuix.kmp.blur.BlurColors
+import top.yukonga.miuix.kmp.blur.BlurDefaults
+import top.yukonga.miuix.kmp.blur.LayerBackdrop
+import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
+import top.yukonga.miuix.kmp.blur.layerBackdrop
+import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
+import top.yukonga.miuix.kmp.blur.textureBlur
 
 class MainActivity : ComponentActivity() {
     
@@ -191,10 +201,13 @@ private fun HomePage() {
 }
 
 @Composable
+@Composable
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
     val lazyListState = rememberLazyListState()
     var logoSpacerHeightPx by remember { mutableStateOf(0) }
+    val backdrop = rememberLayerBackdrop()
+    val blurSupported = remember { isRuntimeShaderSupported() }
 
     val scrollProgress by remember {
         derivedStateOf {
@@ -211,6 +224,7 @@ private fun AboutPage() {
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer { alpha = 1f - scrollProgress }
+                .layerBackdrop(backdrop)
         ) { }
 
         Scaffold(
@@ -486,7 +500,9 @@ private fun AboutScreen(
     padding: PaddingValues,
     lazyListState: LazyListState,
     scrollProgress: Float,
-    onLogoSpacerHeightChanged: (Int) -> Unit
+    onLogoSpacerHeightChanged: (Int) -> Unit,
+    backdrop: LayerBackdrop,
+    blurSupported: Boolean
 ) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
@@ -497,6 +513,20 @@ private fun AboutScreen(
     val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 
     val density = LocalDensity.current
+    val isDark = isSystemInDarkTheme()
+    val logoBlend = remember(isDark) {
+        if (isDark) {
+            listOf(
+                BlendColorEntry(Color(0xe6a1a1a1), BlurBlendMode.ColorDodge),
+                BlendColorEntry(Color(0x4de6e6e6), BlurBlendMode.LinearLight),
+            )
+        } else {
+            listOf(
+                BlendColorEntry(Color(0xcc4a4a4a), BlurBlendMode.ColorBurn),
+                BlendColorEntry(Color(0xff4f4f4f), BlurBlendMode.LinearLight),
+            )
+        }
+    }
     var logoHeightDp by remember { mutableStateOf(0.dp) }
 
     Column(
@@ -542,6 +572,18 @@ private fun AboutScreen(
                     scaleX = 1f - (projectNameProgress * 0.05f)
                     scaleY = 1f - (projectNameProgress * 0.05f)
                 }
+                .then(
+                    if (blurSupported) {
+                        Modifier.textureBlur(
+                            backdrop = backdrop,
+                            shape = RoundedCornerShape(16.dp),
+                            blurRadius = 150f,
+                            noiseCoefficient = BlurDefaults.NoiseCoefficient,
+                            colors = BlurColors(blendColors = logoBlend),
+                            contentBlendMode = BlendMode.DstIn,
+                        )
+                    } else Modifier
+                )
         )
 
         Column(

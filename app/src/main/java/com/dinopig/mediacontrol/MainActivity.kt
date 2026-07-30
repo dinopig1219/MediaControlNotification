@@ -201,7 +201,6 @@ private fun HomePage() {
 }
 
 @Composable
-@Composable
 private fun AboutPage() {
     val scrollBehavior = MiuixScrollBehavior()
     val lazyListState = rememberLazyListState()
@@ -244,7 +243,9 @@ private fun AboutPage() {
                 padding = padding,
                 lazyListState = lazyListState,
                 scrollProgress = scrollProgress,
-                onLogoSpacerHeightChanged = { logoSpacerHeightPx = it }
+                onLogoSpacerHeightChanged = { logoSpacerHeightPx = it },
+                backdrop = backdrop,
+                blurSupported = blurSupported
             )
         }
     }

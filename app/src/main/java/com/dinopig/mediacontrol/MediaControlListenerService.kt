@@ -124,9 +124,17 @@ class MediaControlListenerService : NotificationListenerService() {
 
         if (controller == null || state == null || state.state == PlaybackStateCompat.STATE_NONE) {
             cancelNotification()
+            
+            getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+                .edit()
+                .remove("current_song")
+                .remove("current_artist")
+                .remove("last_debug_info")
+                .apply()
+                
             return
         }
-
+        
         val metadata = controller.metadata
         val isPlaying = state.state == PlaybackStateCompat.STATE_PLAYING
 

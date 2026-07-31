@@ -98,6 +98,7 @@ import top.yukonga.miuix.kmp.blur.isRuntimeShaderSupported
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
+import android.content.ComponentName
 
 class MainActivity : ComponentActivity() {
     
@@ -154,6 +155,23 @@ private fun openBatteryOptimizationSettings(context: Context) {
         data = Uri.parse("package:${context.packageName}")
     }
     context.startActivity(intent)
+}
+
+private fun openAutoStartSettings(context: Context) {
+    try {
+        val intent = Intent().apply {
+            component = ComponentName(
+                "com.miui.securitycenter", 
+                "com.miui.permcenter.autostart.AutoStartManagementActivity"
+            )
+        }
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", context.packageName, null)
+        }
+        context.startActivity(intent)
+    }
 }
 
 @Composable
@@ -452,7 +470,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                     ArrowPreference(
                         title = "自启动（可选）",
                         summary = "确保应用在后台可以持续运行",
-                        onClick = { openAppDetailsSettings(context) }
+                        onClick = { openAutoStartSettings(context) } // 换成这个！
                     )
 
                     ArrowPreference(

@@ -398,15 +398,24 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                             summary = currentPackage
                         )
                         BasicComponent(
-                            title = "自定义动作1",
+                            title = "自定义动作 1 ",
                             summary = customAction1
                         )
                         BasicComponent(
-                            title = "自定义动作2",
+                            title = "自定义动作 2 ",
                             summary = customAction2
                         )
                     }
                 }
+            }
+
+            SmallTitle(text = "通知设置")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                ArrowPreference(
+                    title = "自定义通知动作排序",
+                    summary = "调整展开和收起通知里动作的位置",
+                    onClick = { context.startActivity(Intent(context, OrderActivity::class.java)) }
+                )
             }
 
             SmallTitle(text = "权限设置")

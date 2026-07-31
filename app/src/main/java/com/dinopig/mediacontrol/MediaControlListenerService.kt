@@ -149,27 +149,63 @@ class MediaControlListenerService : NotificationListenerService() {
 
         metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)?.let { builder.setLargeIcon(it) }
 
-        builder.addAction(standardAction(R.drawable.ic_thin_previous, "上一首", MediaActionReceiver.ACTION_SKIP_PREV))
-        builder.addAction(
-            if (isPlaying) standardAction(R.drawable.ic_thin_pause, "暂停", MediaActionReceiver.ACTION_PAUSE)
+        val prefs = getSharedPreferences("debug_info", Context.MODE_PRIVATE)
+
+        val prevAction = standardAction(R.drawable.ic_thin_previous, "上一首", MediaActionReceiver.ACTION_SKIP_PREV)
+        val playPauseAction = if (isPlaying) standardAction(R.drawable.ic_thin_pause, "暂停", MediaActionReceiver.ACTION_PAUSE)
             else standardAction(R.drawable.ic_thin_play, "播放", MediaActionReceiver.ACTION_PLAY)
-        )
-        builder.addAction(standardAction(R.drawable.ic_thin_next, "下一首", MediaActionReceiver.ACTION_SKIP_NEXT))
+        val nextAction = standardAction(R.drawable.ic_thin_next, "下一首", MediaActionReceiver.ACTION_SKIP_NEXT)
+        val customActionsList = state.customActions?.mapIndexed { index, action -> customAction(action, index) } ?: emptyList()
+        val custom1 = customActionsList.getOrNull(0)
+        val custom2 = customActionsList.getOrNull(1)
 
-        // 直接把 Spotify 自己给的 custom actions（含它自己的图标）原样渲染出来，
-        // 状态由 Spotify 自己维护，我们不猜测、不自己画状态。
-        state.customActions?.forEach { builder.addAction(customAction(it)) }
+        val left1 = mutableListOf<NotificationCompat.Action>()
+        val left2 = mutableListOf<NotificationCompat.Action>()
+        val right1 = mutableListOf<NotificationCompat.Action>()
+        val right2 = mutableListOf<NotificationCompat.Action>()
 
-        val customCount = state.customActions?.size ?: 0
-        val compactIndices = (0 until minOf(3, 3 + customCount)).toList().take(3).toIntArray()
+        fun place(slot: String, action: NotificationCompat.Action?) {
+            if (action == null) return
+            when (slot) {
+                "LEFT1" -> left1.add(action)
+                "LEFT2" -> left2.add(action)
+                "RIGHT1" -> right1.add(action)
+                "RIGHT2" -> right2.add(action)
+            }
+        }
+        place(prefs.getString("expanded_custom1_slot", "RIGHT1") ?: "RIGHT1", custom1)
+        place(prefs.getString("expanded_custom2_slot", "RIGHT2") ?: "RIGHT2", custom2)
+
+        val orderedActions = mutableListOf<NotificationCompat.Action>()
+        orderedActions.addAll(left1)
+        orderedActions.addAll(left2)
+        orderedActions.add(prevAction)
+        orderedActions.add(playPauseAction)
+        orderedActions.add(nextAction)
+        orderedActions.addAll(right1)
+        orderedActions.addAll(right2)
+        customActionsList.drop(2).forEach { orderedActions.add(it) }
+
+        orderedActions.forEach { builder.addAction(it) }
+
+        val compactMode = prefs.getString("compact_mode", "STANDARD") ?: "STANDARD"
+        val compactIndices: IntArray = if (compactMode == "CUSTOM" && custom1 != null && custom2 != null) {
+            val side1 = prefs.getString("compact_custom1_side", "LEFT") ?: "LEFT"
+            val side2 = prefs.getString("compact_custom2_side", "RIGHT") ?: "RIGHT"
+            listOf(custom1 to side1, custom2 to side2)
+                .sortedBy { if (it.second == "LEFT") 0 else 1 }
+                .map { orderedActions.indexOf(it.first) }
+                .filter { it >= 0 }
+        } else {
+            listOf(prevAction, playPauseAction, nextAction).map { orderedActions.indexOf(it) }
+        }.distinct().toIntArray()
+
         builder.setStyle(MediaStyle().setShowActionsInCompactView(*compactIndices))
 
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, builder.build())
 
-        // 完整调试信息一直存起来，App 里的 DebugActivity 随时能看到最新的
         saveDebugInfo(state, metadata)
 
-        // 调试通知本身要不要发，看用户在 App 里那个开关
         val debugNotificationsOn = getSharedPreferences("debug_info", Context.MODE_PRIVATE)
             .getBoolean("debug_notifications_enabled", false)
         if (debugNotificationsOn) {
@@ -227,7 +263,7 @@ class MediaControlListenerService : NotificationListenerService() {
         return NotificationCompat.Action.Builder(icon, title, pi).build()
     }
 
-    private fun customAction(customAction: PlaybackStateCompat.CustomAction): NotificationCompat.Action {
+    private fun customAction(customAction: PlaybackStateCompat.CustomAction, index: Int): NotificationCompat.Action {
         val intent = Intent(this, MediaActionReceiver::class.java).apply {
             action = MediaActionReceiver.ACTION_CUSTOM
             putExtra(MediaActionReceiver.EXTRA_CUSTOM_ACTION, customAction.action)
@@ -240,7 +276,8 @@ class MediaControlListenerService : NotificationListenerService() {
             val remoteResources = packageManager.getResourcesForApplication(activePackageName)
             IconCompat.createWithResource(remoteResources, activePackageName, customAction.icon)
         } catch (e: Exception) {
-            IconCompat.createWithResource(resources, packageName, android.R.drawable.ic_menu_help)
+            val fallbackIcon = if (index == 0) R.drawable.ic_custom_1 else R.drawable.ic_custom_2
+            IconCompat.createWithResource(resources, packageName, fallbackIcon)
         }
         return NotificationCompat.Action.Builder(icon, customAction.name.toString(), pi).build()
     }

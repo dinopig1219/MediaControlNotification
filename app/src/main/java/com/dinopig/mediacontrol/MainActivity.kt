@@ -103,6 +103,7 @@ import top.yukonga.miuix.kmp.basic.NavigationRail
 import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import androidx.compose.foundation.layout.Row
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 
 class MainActivity : ComponentActivity() {
     
@@ -254,7 +255,7 @@ private fun HomePage() {
     Scaffold(
         topBar = { 
             if (isTablet) {
-                TopAppBar(
+                SmallTopAppBar(
                     title = "媒体控制通知",
                     scrollBehavior = scrollBehavior
                 )
@@ -308,7 +309,7 @@ private fun AboutPage() {
             containerColor = Color.Transparent,
             topBar = {
                 if (isTablet) {
-                    TopAppBar(
+                    SmallTopAppBar(
                         title = "关于",
                         scrollBehavior = scrollBehavior
                     )

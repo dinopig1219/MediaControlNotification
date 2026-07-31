@@ -43,7 +43,9 @@ class OrderActivity : ComponentActivity() {
             MiuixTheme(
                 colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
             ) {
-                OrderScreen(onBack = { finish() })
+                Scaffold {
+                    OrderScreen(onBack = { finish() })
+                }
             }
         }
     }

@@ -82,8 +82,8 @@ private fun OrderScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "自定义通知动作顺序",
-                largeTitle = "自定义通知动作顺序",
+                title = "自定义通知动作排序",
+                largeTitle = "自定义通知动作排序",
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")

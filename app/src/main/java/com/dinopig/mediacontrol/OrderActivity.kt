@@ -28,6 +28,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
@@ -48,7 +49,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
-import android.content.ComponentName
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,7 +56,7 @@ class OrderActivity : ComponentActivity() {
         setContent {
             MiuixTheme(
                 colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-                ) {
+            ) {
                 Scaffold {
                     OrderScreen(onBack = { finish() })
                 }
@@ -74,6 +74,9 @@ private val SIDE2_LABELS = listOf("左", "右")
 private fun OrderScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
+
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
 
     var custom1Index by remember {
         mutableIntStateOf(SLOT4_KEYS.indexOf(prefs.getString("expanded_custom1_slot", "RIGHT1")).coerceAtLeast(0))
@@ -95,16 +98,28 @@ private fun OrderScreen(onBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = "自定义通知动作排序",
-                largeTitle = "自定义通知动作排序",
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+            if (isTablet) {
+                SmallTopAppBar(
+                    title = "自定义通知动作排序",
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+                        }
                     }
-                },
-                scrollBehavior = scrollBehavior
-            )
+                )
+            } else {
+                TopAppBar(
+                    title = "自定义通知动作排序",
+                    largeTitle = "自定义通知动作排序",
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+                        }
+                    }
+                )
+            }
         }
     ) { padding ->
         Column(
@@ -277,7 +292,7 @@ private fun OrderScreen(onBack: () -> Unit) {
 
                     if (compactModeIndex == 0) {
                         compactPreviewIcons.add(R.drawable.ic_thin_previous)
-                        compactPreviewIcons.add(R.drawable.ic_thin_pause)
+                        compactPreviewIcons.add(R.drawable.ic_thin_play)
                         compactPreviewIcons.add(R.drawable.ic_thin_next)
                     } else {
                         val itemsWithSide = listOf(
@@ -317,7 +332,6 @@ private fun OrderScreen(onBack: () -> Unit) {
                     }
                 }
             }
-            // ================================================
 
             SmallTitle(text = "收起通知")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {

@@ -40,6 +40,7 @@ import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.theme.MiuixTheme
@@ -88,6 +89,9 @@ private fun DebugScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val scrollBehavior = MiuixScrollBehavior()
     
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
+    
     var debugData by remember { mutableStateOf(loadDebugInfo(context)) }
     DisposableEffect(Unit) {
         val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
@@ -103,20 +107,36 @@ private fun DebugScreen(onBack: () -> Unit) {
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-        Scaffold(
+    Scaffold(
         topBar = {
-            TopAppBar(
-                title = "调试信息",
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = MiuixIcons.Back,
-                            contentDescription = "返回"
-                        )
+            if (isTablet) {
+                SmallTopAppBar(
+                    title = "调试信息",
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = MiuixIcons.Back,
+                                contentDescription = "返回"
+                            )
+                        }
                     }
-                }
-            )
+                )
+            } else {
+                TopAppBar(
+                    title = "调试信息",
+                    largeTitle = "调试信息",
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                imageVector = MiuixIcons.Back,
+                                contentDescription = "返回"
+                            )
+                        }
+                    }
+                )
+            }
         }
     ) { padding ->
         Column(
@@ -180,7 +200,6 @@ private fun DebugScreen(onBack: () -> Unit) {
         }
     }
 }
-
 
 private fun loadDebugInfo(context: Context): DebugData {
     val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)

@@ -155,7 +155,7 @@ class MediaControlListenerService : NotificationListenerService() {
         val playPauseAction = if (isPlaying) standardAction(R.drawable.ic_thin_pause, "暂停", MediaActionReceiver.ACTION_PAUSE)
             else standardAction(R.drawable.ic_thin_play, "播放", MediaActionReceiver.ACTION_PLAY)
         val nextAction = standardAction(R.drawable.ic_thin_next, "下一首", MediaActionReceiver.ACTION_SKIP_NEXT)
-        val customActionsList = state.customActions?.map { customAction(it) } ?: emptyList()
+        val customActionsList = state.customActions?.mapIndexed { index, action -> customAction(action, index) } ?: emptyList()
         val custom1 = customActionsList.getOrNull(0)
         val custom2 = customActionsList.getOrNull(1)
 
@@ -204,10 +204,8 @@ class MediaControlListenerService : NotificationListenerService() {
 
         getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, builder.build())
 
-        // 完整调试信息一直存起来，App 里的 DebugActivity 随时能看到最新的
         saveDebugInfo(state, metadata)
 
-        // 调试通知本身要不要发，看用户在 App 里那个开关
         val debugNotificationsOn = getSharedPreferences("debug_info", Context.MODE_PRIVATE)
             .getBoolean("debug_notifications_enabled", false)
         if (debugNotificationsOn) {
@@ -265,7 +263,7 @@ class MediaControlListenerService : NotificationListenerService() {
         return NotificationCompat.Action.Builder(icon, title, pi).build()
     }
 
-    private fun customAction(customAction: PlaybackStateCompat.CustomAction): NotificationCompat.Action {
+    private fun customAction(customAction: PlaybackStateCompat.CustomAction, index: Int): NotificationCompat.Action {
         val intent = Intent(this, MediaActionReceiver::class.java).apply {
             action = MediaActionReceiver.ACTION_CUSTOM
             putExtra(MediaActionReceiver.EXTRA_CUSTOM_ACTION, customAction.action)
@@ -278,7 +276,8 @@ class MediaControlListenerService : NotificationListenerService() {
             val remoteResources = packageManager.getResourcesForApplication(activePackageName)
             IconCompat.createWithResource(remoteResources, activePackageName, customAction.icon)
         } catch (e: Exception) {
-            IconCompat.createWithResource(resources, packageName, android.R.drawable.ic_menu_help)
+            val fallbackIcon = if (index == 0) R.drawable.ic_custom_1 else R.drawable.ic_custom_2
+            IconCompat.createWithResource(resources, packageName, fallbackIcon)
         }
         return NotificationCompat.Action.Builder(icon, customAction.name.toString(), pi).build()
     }

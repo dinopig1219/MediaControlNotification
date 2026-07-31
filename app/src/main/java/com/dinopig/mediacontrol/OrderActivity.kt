@@ -35,16 +35,31 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import top.yukonga.miuix.kmp.utils.LocalNavigationEventDispatcherOwner
+import top.yukonga.miuix.kmp.utils.NavigationEventDispatcherOwner
+import top.yukonga.miuix.kmp.utils.NavigationEventDispatcher
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MiuixTheme(
-                colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+            val dispatcherOwner = remember {
+                object : NavigationEventDispatcherOwner {
+                    override val navigationEventDispatcher = NavigationEventDispatcher()
+                }
+            }
+
+            CompositionLocalProvider(
+                LocalNavigationEventDispatcherOwner provides dispatcherOwner
             ) {
-                Scaffold {
-                    OrderScreen(onBack = { finish() })
+                MiuixTheme(
+                    colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+                ) {
+                    Scaffold {
+                        OrderScreen(onBack = { finish() })
+                    }
                 }
             }
         }

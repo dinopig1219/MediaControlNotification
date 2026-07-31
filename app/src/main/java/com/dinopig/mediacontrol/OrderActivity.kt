@@ -35,6 +35,8 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,31 +112,88 @@ private fun OrderScreen(onBack: () -> Unit) {
                 Column {
                     OverlayDropdownPreference(
                         title = "自定义动作 1 位置",
-                        items = SLOT4_LABELS,
-                        selectedIndex = custom1Index,
-                        onSelectedIndexChange = { newIndex ->
-                            val oldIndex = custom1Index
-                            custom1Index = newIndex
-                            prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[newIndex]).apply()
-                            if (custom2Index == newIndex) {
-                                custom2Index = oldIndex
-                                prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[oldIndex]).apply()
-                            }
-                        }
+                        collapseOnSelection = true,
+                        entries = listOf(
+                            DropdownEntry(
+                                items = listOf(0, 1).map { index ->
+                                    DropdownItem(
+                                        text = SLOT4_LABELS[index],
+                                        selected = custom1Index == index,
+                                        onClick = {
+                                            val oldIndex = custom1Index
+                                            custom1Index = index
+                                            prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[index]).apply()
+                                            
+                                            if (custom2Index == index) {
+                                                custom2Index = oldIndex
+                                                prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[oldIndex]).apply()
+                                            }
+                                        }
+                                    )
+                                }
+                            ),
+                            DropdownEntry(
+                                items = listOf(2, 3).map { index ->
+                                    DropdownItem(
+                                        text = SLOT4_LABELS[index],
+                                        selected = custom1Index == index,
+                                        onClick = {
+                                            val oldIndex = custom1Index
+                                            custom1Index = index
+                                            prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[index]).apply()
+                                            
+                                            if (custom2Index == index) {
+                                                custom2Index = oldIndex
+                                                prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[oldIndex]).apply()
+                                            }
+                                        }
+                                    )
+                                }
+                            )
+                        )
                     )
+                    
                     OverlayDropdownPreference(
                         title = "自定义动作 2 位置",
-                        items = SLOT4_LABELS,
-                        selectedIndex = custom2Index,
-                        onSelectedIndexChange = { newIndex ->
-                            val oldIndex = custom2Index
-                            custom2Index = newIndex
-                            prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[newIndex]).apply()
-                            if (custom1Index == newIndex) {
-                                custom1Index = oldIndex
-                                prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[oldIndex]).apply()
-                            }
-                        }
+                        collapseOnSelection = true,
+                        entries = listOf(
+                            DropdownEntry(
+                                items = listOf(0, 1).map { index ->
+                                    DropdownItem(
+                                        text = SLOT4_LABELS[index],
+                                        selected = custom2Index == index,
+                                        onClick = {
+                                            val oldIndex = custom2Index
+                                            custom2Index = index
+                                            prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[index]).apply()
+                                            
+                                            if (custom1Index == index) {
+                                                custom1Index = oldIndex
+                                                prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[oldIndex]).apply()
+                                            }
+                                        }
+                                    )
+                                }
+                            ),
+                            DropdownEntry(
+                                items = listOf(2, 3).map { index ->
+                                    DropdownItem(
+                                        text = SLOT4_LABELS[index],
+                                        selected = custom2Index == index,
+                                        onClick = {
+                                            val oldIndex = custom2Index
+                                            custom2Index = index
+                                            prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[index]).apply()
+                                            
+                                            if (custom1Index == index) {
+                                                custom1Index = oldIndex
+                                                prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[oldIndex]).apply()
+                                            }
+                                        }
+                                    )
+                                }
+                            )
+                        )
                     )
                 }
             }

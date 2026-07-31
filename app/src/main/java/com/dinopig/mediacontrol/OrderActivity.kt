@@ -65,7 +65,7 @@ class OrderActivity : ComponentActivity() {
 }
 
 private val SLOT4_KEYS = listOf("LEFT1", "LEFT2", "RIGHT1", "RIGHT2")
-private val SLOT4_LABELS = listOf("左1", "左2", "右1", "右2")
+private val SLOT4_LABELS = listOf("左 1", "左 2", "右 1", "右 2")
 private val SIDE2_KEYS = listOf("LEFT", "RIGHT")
 private val SIDE2_LABELS = listOf("左", "右")
 

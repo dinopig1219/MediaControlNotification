@@ -159,16 +159,16 @@ class MediaControlListenerService : NotificationListenerService() {
         val custom1 = customActionsList.getOrNull(0)
         val custom2 = customActionsList.getOrNull(1)
 
-        val left2 = mutableListOf<NotificationCompat.Action>()
         val left1 = mutableListOf<NotificationCompat.Action>()
+        val left2 = mutableListOf<NotificationCompat.Action>()
         val right1 = mutableListOf<NotificationCompat.Action>()
         val right2 = mutableListOf<NotificationCompat.Action>()
 
         fun place(slot: String, action: NotificationCompat.Action?) {
             if (action == null) return
             when (slot) {
-                "LEFT2" -> left2.add(action)
                 "LEFT1" -> left1.add(action)
+                "LEFT2" -> left2.add(action)
                 "RIGHT1" -> right1.add(action)
                 "RIGHT2" -> right2.add(action)
             }
@@ -177,8 +177,8 @@ class MediaControlListenerService : NotificationListenerService() {
         place(prefs.getString("expanded_custom2_slot", "RIGHT2") ?: "RIGHT2", custom2)
 
         val orderedActions = mutableListOf<NotificationCompat.Action>()
-        orderedActions.addAll(left2)
         orderedActions.addAll(left1)
+        orderedActions.addAll(left2)
         orderedActions.add(prevAction)
         orderedActions.add(playPauseAction)
         orderedActions.add(nextAction)

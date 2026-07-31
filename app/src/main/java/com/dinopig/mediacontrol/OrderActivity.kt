@@ -115,8 +115,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                 .padding(
                     top = padding.calculateTopPadding(),
                     bottom = 16.dp
-                ),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                )
         ) {
             SmallTitle(text = "展开状态排序")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {

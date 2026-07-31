@@ -82,8 +82,8 @@ private fun OrderScreen(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = "按钮排序",
-                largeTitle = "按钮排序",
+                title = "自定义通知动作顺序",
+                largeTitle = "自定义通知动作顺序",
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
@@ -133,8 +133,8 @@ private fun OrderScreen(onBack: () -> Unit) {
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     OverlayDropdownPreference(
-                        title = "显示内容",
-                        items = listOf("播放器三宝", "自定义按钮"),
+                        title = "显示动作",
+                        items = listOf("音乐控制动作", "自定义动作"),
                         selectedIndex = compactModeIndex,
                         onSelectedIndexChange = {
                             compactModeIndex = it

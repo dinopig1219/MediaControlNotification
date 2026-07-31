@@ -37,6 +37,17 @@ import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
 import top.yukonga.miuix.kmp.basic.DropdownEntry
 import top.yukonga.miuix.kmp.basic.DropdownItem
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.sp
+import top.yukonga.miuix.kmp.basic.Text
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,6 +118,61 @@ private fun OrderScreen(onBack: () -> Unit) {
                 ),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
+            SmallTitle(text = "展开状态排序")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val previewIcons = mutableListOf<Int>()
+                    
+                    if (custom1Index == 0) previewIcons.add(R.drawable.ic_custom_1)
+                    if (custom2Index == 0) previewIcons.add(R.drawable.ic_custom_2)
+
+                    if (custom1Index == 1) previewIcons.add(R.drawable.ic_custom_1)
+                    if (custom2Index == 1) previewIcons.add(R.drawable.ic_custom_2)
+
+                    previewIcons.add(R.drawable.ic_thin_previous)
+                    previewIcons.add(R.drawable.ic_thin_play) 
+                    previewIcons.add(R.drawable.ic_thin_next)
+
+                    if (custom1Index == 2) previewIcons.add(R.drawable.ic_custom_1)
+                    if (custom2Index == 2) previewIcons.add(R.drawable.ic_custom_2)
+                    
+                    if (custom1Index == 3) previewIcons.add(R.drawable.ic_custom_1)
+                    if (custom2Index == 3) previewIcons.add(R.drawable.ic_custom_2)
+
+                    previewIcons.forEach { iconResId ->
+                        val isCustom = iconResId == R.drawable.ic_custom_1 || iconResId == R.drawable.ic_custom_2
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(
+                                    color = MiuixTheme.colorScheme.surfaceVariant, 
+                                    shape = RoundedCornerShape(50)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = iconResId),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp), 
+                                colorFilter = ColorFilter.tint(
+                                    if (isCustom) 
+                                        MiuixTheme.colorScheme.primary 
+                                    else 
+                                        MiuixTheme.colorScheme.onSurface
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            
             SmallTitle(text = "展开通知")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {

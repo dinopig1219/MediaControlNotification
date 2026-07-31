@@ -35,6 +35,19 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
+import top.yukonga.miuix.kmp.basic.DropdownEntry
+import top.yukonga.miuix.kmp.basic.DropdownItem
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.sp
+import top.yukonga.miuix.kmp.basic.Text
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +65,7 @@ class OrderActivity : ComponentActivity() {
 }
 
 private val SLOT4_KEYS = listOf("LEFT1", "LEFT2", "RIGHT1", "RIGHT2")
-private val SLOT4_LABELS = listOf("左1", "左2", "右1", "右2")
+private val SLOT4_LABELS = listOf("左 1", "左 2", "右 1", "右 2")
 private val SIDE2_KEYS = listOf("LEFT", "RIGHT")
 private val SIDE2_LABELS = listOf("左", "右")
 
@@ -102,39 +115,150 @@ private fun OrderScreen(onBack: () -> Unit) {
                 .padding(
                     top = padding.calculateTopPadding(),
                     bottom = 16.dp
-                ),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                )
         ) {
+            SmallTitle(text = "展开状态排序")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val previewIcons = mutableListOf<Int>()
+                    
+                    if (custom1Index == 0) previewIcons.add(R.drawable.ic_custom_1)
+                    if (custom2Index == 0) previewIcons.add(R.drawable.ic_custom_2)
+
+                    if (custom1Index == 1) previewIcons.add(R.drawable.ic_custom_1)
+                    if (custom2Index == 1) previewIcons.add(R.drawable.ic_custom_2)
+
+                    previewIcons.add(R.drawable.ic_thin_previous)
+                    previewIcons.add(R.drawable.ic_thin_pause) 
+                    previewIcons.add(R.drawable.ic_thin_next)
+
+                    if (custom1Index == 2) previewIcons.add(R.drawable.ic_custom_1)
+                    if (custom2Index == 2) previewIcons.add(R.drawable.ic_custom_2)
+                    
+                    if (custom1Index == 3) previewIcons.add(R.drawable.ic_custom_1)
+                    if (custom2Index == 3) previewIcons.add(R.drawable.ic_custom_2)
+
+                    previewIcons.forEach { iconResId ->
+                        val isCustom = iconResId == R.drawable.ic_custom_1 || iconResId == R.drawable.ic_custom_2
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(
+                                    color = MiuixTheme.colorScheme.surfaceVariant, 
+                                    shape = RoundedCornerShape(50)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = iconResId),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp), 
+                                colorFilter = ColorFilter.tint(
+                                    if (isCustom) 
+                                        MiuixTheme.colorScheme.primary 
+                                    else 
+                                        MiuixTheme.colorScheme.onSurface
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            
             SmallTitle(text = "展开通知")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     OverlayDropdownPreference(
                         title = "自定义动作 1 位置",
-                        items = SLOT4_LABELS,
-                        selectedIndex = custom1Index,
-                        onSelectedIndexChange = { newIndex ->
-                            val oldIndex = custom1Index
-                            custom1Index = newIndex
-                            prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[newIndex]).apply()
-                            if (custom2Index == newIndex) {
-                                custom2Index = oldIndex
-                                prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[oldIndex]).apply()
-                            }
-                        }
+                        collapseOnSelection = true,
+                        entries = listOf(
+                            DropdownEntry(
+                                items = listOf(0, 1).map { index ->
+                                    DropdownItem(
+                                        text = SLOT4_LABELS[index],
+                                        selected = custom1Index == index,
+                                        onClick = {
+                                            val oldIndex = custom1Index
+                                            custom1Index = index
+                                            prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[index]).apply()
+                                            
+                                            if (custom2Index == index) {
+                                                custom2Index = oldIndex
+                                                prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[oldIndex]).apply()
+                                            }
+                                        }
+                                    )
+                                }
+                            ),
+                            DropdownEntry(
+                                items = listOf(2, 3).map { index ->
+                                    DropdownItem(
+                                        text = SLOT4_LABELS[index],
+                                        selected = custom1Index == index,
+                                        onClick = {
+                                            val oldIndex = custom1Index
+                                            custom1Index = index
+                                            prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[index]).apply()
+                                            
+                                            if (custom2Index == index) {
+                                                custom2Index = oldIndex
+                                                prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[oldIndex]).apply()
+                                            }
+                                        }
+                                    )
+                                }
+                            )
+                        )
                     )
+                    
                     OverlayDropdownPreference(
                         title = "自定义动作 2 位置",
-                        items = SLOT4_LABELS,
-                        selectedIndex = custom2Index,
-                        onSelectedIndexChange = { newIndex ->
-                            val oldIndex = custom2Index
-                            custom2Index = newIndex
-                            prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[newIndex]).apply()
-                            if (custom1Index == newIndex) {
-                                custom1Index = oldIndex
-                                prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[oldIndex]).apply()
-                            }
-                        }
+                        collapseOnSelection = true,
+                        entries = listOf(
+                            DropdownEntry(
+                                items = listOf(0, 1).map { index ->
+                                    DropdownItem(
+                                        text = SLOT4_LABELS[index],
+                                        selected = custom2Index == index,
+                                        onClick = {
+                                            val oldIndex = custom2Index
+                                            custom2Index = index
+                                            prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[index]).apply()
+                                            
+                                            if (custom1Index == index) {
+                                                custom1Index = oldIndex
+                                                prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[oldIndex]).apply()
+                                            }
+                                        }
+                                    )
+                                }
+                            ),
+                            DropdownEntry(
+                                items = listOf(2, 3).map { index ->
+                                    DropdownItem(
+                                        text = SLOT4_LABELS[index],
+                                        selected = custom2Index == index,
+                                        onClick = {
+                                            val oldIndex = custom2Index
+                                            custom2Index = index
+                                            prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[index]).apply()
+                                            
+                                            if (custom1Index == index) {
+                                                custom1Index = oldIndex
+                                                prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[oldIndex]).apply()
+                                            }
+                                        }
+                                    )
+                                }
+                            )
+                        )
                     )
                 }
             }

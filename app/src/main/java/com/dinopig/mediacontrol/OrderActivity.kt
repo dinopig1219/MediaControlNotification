@@ -277,7 +277,7 @@ private fun OrderScreen(onBack: () -> Unit) {
 
                     if (compactModeIndex == 0) {
                         compactPreviewIcons.add(R.drawable.ic_thin_previous)
-                        compactPreviewIcons.add(R.drawable.ic_thin_play)
+                        compactPreviewIcons.add(R.drawable.ic_thin_pause)
                         compactPreviewIcons.add(R.drawable.ic_thin_next)
                     } else {
                         val itemsWithSide = listOf(

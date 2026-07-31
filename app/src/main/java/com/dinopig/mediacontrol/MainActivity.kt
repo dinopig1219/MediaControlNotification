@@ -248,8 +248,24 @@ private fun RootScreen() {
 @Composable
 private fun HomePage() {
     val scrollBehavior = MiuixScrollBehavior()
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
+
     Scaffold(
-        topBar = { TopAppBar(title = "媒体控制通知", scrollBehavior = scrollBehavior) }
+        topBar = { 
+            if (isTablet) {
+                TopAppBar(
+                    title = "媒体控制通知",
+                    scrollBehavior = scrollBehavior
+                )
+            } else {
+                TopAppBar(
+                    title = "媒体控制通知",
+                    largeTitle = "媒体控制通知",
+                    scrollBehavior = scrollBehavior
+                )
+            }
+        }
     ) { padding ->
         HomeScreen(scrollBehavior, padding)
     }
@@ -262,6 +278,9 @@ private fun AboutPage() {
     var logoSpacerHeightPx by remember { mutableStateOf(0) }
     val backdrop = rememberLayerBackdrop()
     val blurSupported = remember { isRuntimeShaderSupported() }
+
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
 
     val scrollProgress by remember {
         derivedStateOf {
@@ -288,13 +307,20 @@ private fun AboutPage() {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                TopAppBar(
-                    title = "关于",
-                    largeTitle = "",
-                    scrollBehavior = scrollBehavior,
-                    color = if (scrollProgress > 0.99f) MiuixTheme.colorScheme.surface else Color.Transparent,
-                    titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
-                )
+                if (isTablet) {
+                    TopAppBar(
+                        title = "关于",
+                        scrollBehavior = scrollBehavior
+                    )
+                } else {
+                    TopAppBar(
+                        title = "关于",
+                        largeTitle = "",
+                        scrollBehavior = scrollBehavior,
+                        color = if (scrollProgress > 0.99f) MiuixTheme.colorScheme.surface else Color.Transparent,
+                        titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
+                    )
+                }
             }
         ) { padding ->
             AboutScreen(

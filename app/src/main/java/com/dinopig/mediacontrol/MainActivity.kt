@@ -409,6 +409,15 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                 }
             }
 
+            SmallTitle(text = "按钮排序")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                ArrowPreference(
+                    title = "自定义通知按钮顺序",
+                    summary = "调整展开/收起通知里各个按钮的位置",
+                    onClick = { context.startActivity(Intent(context, OrderActivity::class.java)) }
+                )
+            }
+
             SmallTitle(text = "权限设置")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {

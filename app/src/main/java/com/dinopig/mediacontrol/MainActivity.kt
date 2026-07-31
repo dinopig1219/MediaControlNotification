@@ -272,7 +272,11 @@ private fun AboutPage() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MiuixTheme.colorScheme.surface)
+    ) {
         BgEffectBackground(
             dynamicBackground = true,
             modifier = Modifier

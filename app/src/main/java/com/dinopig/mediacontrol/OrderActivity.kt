@@ -48,6 +48,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import android.content.ComponentName
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -262,6 +263,61 @@ private fun OrderScreen(onBack: () -> Unit) {
                     )
                 }
             }
+
+            SmallTitle(text = "收起状态排序")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val compactPreviewIcons = mutableListOf<Int>()
+
+                    if (compactModeIndex == 0) {
+                        compactPreviewIcons.add(R.drawable.ic_thin_previous)
+                        compactPreviewIcons.add(R.drawable.ic_thin_play)
+                        compactPreviewIcons.add(R.drawable.ic_thin_next)
+                    } else {
+                        val itemsWithSide = listOf(
+                            R.drawable.ic_custom_1 to compactSide1Index,
+                            R.drawable.ic_custom_2 to compactSide2Index
+                        ).sortedBy { it.second }
+
+                        itemsWithSide.forEach { (icon, _) ->
+                            compactPreviewIcons.add(icon)
+                        }
+                    }
+
+                    compactPreviewIcons.forEach { iconResId ->
+                        val isCustom = iconResId == R.drawable.ic_custom_1 || iconResId == R.drawable.ic_custom_2
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(
+                                    color = MiuixTheme.colorScheme.surfaceVariant, 
+                                    shape = RoundedCornerShape(50)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = iconResId),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp), 
+                                colorFilter = ColorFilter.tint(
+                                    if (isCustom) 
+                                        MiuixTheme.colorScheme.primary 
+                                    else 
+                                        MiuixTheme.colorScheme.onSurface
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+            // ================================================
 
             SmallTitle(text = "收起通知")
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {

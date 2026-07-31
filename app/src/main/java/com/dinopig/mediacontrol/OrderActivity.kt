@@ -49,6 +49,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import android.content.Intent
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +75,11 @@ private val SIDE2_LABELS = listOf("左", "右")
 private fun OrderScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
+
+    val notifyServiceRefresh = {
+        val intent = Intent("com.dinopig.mediacontrol.ACTION_REFRESH_NOTIFICATION")
+        context.sendBroadcast(intent)
+    }
 
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isTablet = configuration.screenWidthDp >= 600
@@ -209,6 +215,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                                                 custom2Index = oldIndex
                                                 prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[oldIndex]).apply()
                                             }
+                                            notifyServiceRefresh()
                                         }
                                     )
                                 }
@@ -227,6 +234,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                                                 custom2Index = oldIndex
                                                 prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[oldIndex]).apply()
                                             }
+                                            notifyServiceRefresh()
                                         }
                                     )
                                 }
@@ -252,6 +260,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                                                 custom1Index = oldIndex
                                                 prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[oldIndex]).apply()
                                             }
+                                            notifyServiceRefresh()
                                         }
                                     )
                                 }
@@ -270,6 +279,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                                                 custom1Index = oldIndex
                                                 prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[oldIndex]).apply()
                                             }
+                                            notifyServiceRefresh()
                                         }
                                     )
                                 }
@@ -343,6 +353,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                         onSelectedIndexChange = {
                             compactModeIndex = it
                             prefs.edit().putString("compact_mode", if (it == 1) "CUSTOM" else "STANDARD").apply()
+                            notifyServiceRefresh()
                         }
                     )
 
@@ -359,6 +370,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                                     compactSide2Index = oldIndex
                                     prefs.edit().putString("compact_custom2_side", SIDE2_KEYS[oldIndex]).apply()
                                 }
+                                notifyServiceRefresh()
                             }
                         )
                         OverlayDropdownPreference(
@@ -373,6 +385,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                                     compactSide1Index = oldIndex
                                     prefs.edit().putString("compact_custom1_side", SIDE2_KEYS[oldIndex]).apply()
                                 }
+                                notifyServiceRefresh()
                             }
                         )
                     }

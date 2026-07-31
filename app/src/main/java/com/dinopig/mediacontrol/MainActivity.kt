@@ -470,7 +470,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                     ArrowPreference(
                         title = "自启动（可选）",
                         summary = "确保应用在后台可以持续运行",
-                        onClick = { openAutoStartSettings(context) } // 换成这个！
+                        onClick = { openAutoStartSettings(context) }
                     )
 
                     ArrowPreference(

@@ -122,7 +122,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 24.dp),
+                        .padding(vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -135,7 +135,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                     if (custom2Index == 1) previewIcons.add(R.drawable.ic_custom_2)
 
                     previewIcons.add(R.drawable.ic_thin_previous)
-                    previewIcons.add(R.drawable.ic_thin_play) 
+                    previewIcons.add(R.drawable.ic_thin_pause) 
                     previewIcons.add(R.drawable.ic_thin_next)
 
                     if (custom1Index == 2) previewIcons.add(R.drawable.ic_custom_1)

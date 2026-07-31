@@ -99,6 +99,10 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import android.content.ComponentName
+import top.yukonga.miuix.kmp.basic.NavigationRail
+import top.yukonga.miuix.kmp.basic.NavigationRailItem
+import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
+import androidx.compose.foundation.layout.Row
 
 class MainActivity : ComponentActivity() {
     
@@ -178,32 +182,65 @@ private fun openAutoStartSettings(context: Context) {
 private fun RootScreen() {
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
+    
+    val railState = rememberNavigationRailState()
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
+
+    if (isTablet) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            NavigationRail(
+                state = railState
+            ) {
+                NavigationRailItem(
                     selected = pagerState.currentPage == 0,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                     icon = MiuixIcons.Home,
                     label = "主页"
                 )
-                NavigationBarItem(
+                NavigationRailItem(
                     selected = pagerState.currentPage == 1,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
                     icon = MiuixIcons.Demibold.Info,
                     label = "关于"
                 )
             }
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                if (page == 0) HomePage() else AboutPage()
+            }
         }
-    ) { outerPadding ->
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = outerPadding.calculateBottomPadding())
-        ) { page ->
-            if (page == 0) HomePage() else AboutPage()
+    } else {
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = pagerState.currentPage == 0,
+                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
+                        icon = MiuixIcons.Home,
+                        label = "主页"
+                    )
+                    NavigationBarItem(
+                        selected = pagerState.currentPage == 1,
+                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
+                        icon = MiuixIcons.Demibold.Info,
+                        label = "关于"
+                    )
+                }
+            }
+        ) { outerPadding ->
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = outerPadding.calculateBottomPadding())
+            ) { page ->
+                if (page == 0) HomePage() else AboutPage()
+            }
         }
     }
 }

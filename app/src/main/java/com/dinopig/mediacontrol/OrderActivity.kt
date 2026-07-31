@@ -45,26 +45,15 @@ class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val dispatcherOwner = remember {
-                object : NavigationEventDispatcherOwner {
-                    override val navigationEventDispatcher = NavigationEventDispatcher()
-                }
-            }
-
-            CompositionLocalProvider(
-                LocalNavigationEventDispatcherOwner provides dispatcherOwner
+            MiuixTheme(
+                colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
             ) {
-                MiuixTheme(
-                    colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-                ) {
-                    Scaffold {
-                        OrderScreen(onBack = { finish() })
-                    }
-                }
+                OrderScreen(onBack = { finish() })
             }
         }
     }
 }
+
 
 private val SLOT4_KEYS = listOf("LEFT2", "LEFT1", "RIGHT1", "RIGHT2")
 private val SLOT4_LABELS = listOf("左2", "左1", "右1", "右2")

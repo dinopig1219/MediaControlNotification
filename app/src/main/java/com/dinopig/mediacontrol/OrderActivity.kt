@@ -112,18 +112,28 @@ private fun OrderScreen(onBack: () -> Unit) {
                         title = "自定义动作 1 位置",
                         items = SLOT4_LABELS,
                         selectedIndex = custom1Index,
-                        onSelectedIndexChange = {
-                            custom1Index = it
-                            prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[it]).apply()
+                        onSelectedIndexChange = { newIndex ->
+                            val oldIndex = custom1Index
+                            custom1Index = newIndex
+                            prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[newIndex]).apply()
+                            if (custom2Index == newIndex) {
+                                custom2Index = oldIndex
+                                prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[oldIndex]).apply()
+                            }
                         }
                     )
                     OverlayDropdownPreference(
                         title = "自定义动作 2 位置",
                         items = SLOT4_LABELS,
                         selectedIndex = custom2Index,
-                        onSelectedIndexChange = {
-                            custom2Index = it
-                            prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[it]).apply()
+                        onSelectedIndexChange = { newIndex ->
+                            val oldIndex = custom2Index
+                            custom2Index = newIndex
+                            prefs.edit().putString("expanded_custom2_slot", SLOT4_KEYS[newIndex]).apply()
+                            if (custom1Index == newIndex) {
+                                custom1Index = oldIndex
+                                prefs.edit().putString("expanded_custom1_slot", SLOT4_KEYS[oldIndex]).apply()
+                            }
                         }
                     )
                 }
@@ -147,18 +157,28 @@ private fun OrderScreen(onBack: () -> Unit) {
                             title = "自定义动作 1 位置",
                             items = SIDE2_LABELS,
                             selectedIndex = compactSide1Index,
-                            onSelectedIndexChange = {
-                                compactSide1Index = it
-                                prefs.edit().putString("compact_custom1_side", SIDE2_KEYS[it]).apply()
+                            onSelectedIndexChange = { newIndex ->
+                                val oldIndex = compactSide1Index
+                                compactSide1Index = newIndex
+                                prefs.edit().putString("compact_custom1_side", SIDE2_KEYS[newIndex]).apply()
+                                if (compactSide2Index == newIndex) {
+                                    compactSide2Index = oldIndex
+                                    prefs.edit().putString("compact_custom2_side", SIDE2_KEYS[oldIndex]).apply()
+                                }
                             }
                         )
                         OverlayDropdownPreference(
                             title = "自定义动作 2 位置",
                             items = SIDE2_LABELS,
                             selectedIndex = compactSide2Index,
-                            onSelectedIndexChange = {
-                                compactSide2Index = it
-                                prefs.edit().putString("compact_custom2_side", SIDE2_KEYS[it]).apply()
+                            onSelectedIndexChange = { newIndex ->
+                                val oldIndex = compactSide2Index
+                                compactSide2Index = newIndex
+                                prefs.edit().putString("compact_custom2_side", SIDE2_KEYS[newIndex]).apply()
+                                if (compactSide1Index == newIndex) {
+                                    compactSide1Index = oldIndex
+                                    prefs.edit().putString("compact_custom1_side", SIDE2_KEYS[oldIndex]).apply()
+                                }
                             }
                         )
                     }

@@ -35,11 +35,6 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
 import top.yukonga.miuix.kmp.utils.overScrollVertical
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
-import top.yukonga.miuix.kmp.utils.LocalNavigationEventDispatcherOwner
-import top.yukonga.miuix.kmp.utils.NavigationEventDispatcherOwner
-import top.yukonga.miuix.kmp.utils.NavigationEventDispatcher
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,13 +42,14 @@ class OrderActivity : ComponentActivity() {
         setContent {
             MiuixTheme(
                 colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-            ) {
-                OrderScreen(onBack = { finish() })
+                ) {
+                Scaffold {
+                    OrderScreen(onBack = { finish() })
+                }
             }
         }
     }
 }
-
 
 private val SLOT4_KEYS = listOf("LEFT2", "LEFT1", "RIGHT1", "RIGHT2")
 private val SLOT4_LABELS = listOf("左2", "左1", "右1", "右2")

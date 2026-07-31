@@ -34,6 +34,7 @@ import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.darkColorScheme
 import top.yukonga.miuix.kmp.theme.lightColorScheme
+import top.yukonga.miuix.kmp.utils.overScrollVertical
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

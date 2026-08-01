@@ -51,16 +51,12 @@ class MediaControlListenerService : NotificationListenerService() {
     }
 
         private val refreshReceiver = object : android.content.BroadcastReceiver() {
-        if (intent?.action == "com.dinopig.mediacontrol.ACTION_REFRESH_NOTIFICATION") {
-            val controller = activeController
-            val state = controller?.playbackState
-            if (controller != null && state != null) {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "com.dinopig.mediacontrol.ACTION_REFRESH_NOTIFICATION") {
                 updateNotification()
             }
         }
-    }
-
-
+     }
 
     override fun onCreate() {
         super.onCreate()

@@ -50,15 +50,6 @@ class MediaControlListenerService : NotificationListenerService() {
         }
     }
 
-    private val refreshReceiver = object : android.content.BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == "com.dinopig.mediacontrol.ACTION_REFRESH_NOTIFICATION") {
-                updateNotification()
-            }
-        }
-    }
-
-
     override fun onCreate() {
         super.onCreate()
         createChannel()
@@ -66,13 +57,6 @@ class MediaControlListenerService : NotificationListenerService() {
     
         getSharedPreferences("debug_info", Context.MODE_PRIVATE)
             .registerOnSharedPreferenceChangeListener(prefsListener)
-
-        val filter = android.content.IntentFilter("com.dinopig.mediacontrol.ACTION_REFRESH_NOTIFICATION")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(refreshReceiver, filter, RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(refreshReceiver, filter)
-        }
     }
 
     override fun onDestroy() {
@@ -80,12 +64,6 @@ class MediaControlListenerService : NotificationListenerService() {
         
         getSharedPreferences("debug_info", Context.MODE_PRIVATE)
             .unregisterOnSharedPreferenceChangeListener(prefsListener)
-
-        try {
-            unregisterReceiver(refreshReceiver)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 
     override fun onListenerConnected() {

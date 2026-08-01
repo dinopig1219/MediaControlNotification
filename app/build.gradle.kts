@@ -19,9 +19,9 @@ android {
         versionName = if (!releaseTag.isNullOrEmpty()) {
             releaseTag 
         } else if (commitSha != null) {
-            "1.0-$commitSha"
+            "1.1-$commitSha"
         } else {
-            "1.0"
+            "1.1"
         }
     }
 

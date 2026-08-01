@@ -93,11 +93,12 @@ private fun DebugScreen(onBack: () -> Unit) {
     val isTablet = configuration.screenWidthDp >= 600
     
     var debugData by remember { mutableStateOf(loadDebugInfo(context)) }
-    
     DisposableEffect(Unit) {
         val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
-        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, _ ->
-            debugData = loadDebugInfo(context)
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == "current_song" || key == "current_artist" || key == "last_debug_info") {
+                debugData = loadDebugInfo(context)
+            }
         }
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }

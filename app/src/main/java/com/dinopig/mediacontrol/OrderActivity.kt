@@ -378,6 +378,17 @@ private fun OrderScreen(onBack: () -> Unit) {
                     }
                 }
             }
+            Text(
+                text = "更改将会在音乐状态有变动时生效。",
+                style = MiuixTheme.textStyles.subtitle,
+                color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                fontWeight = FontWeight.Normal,
+                fontSize = 13.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 8.dp, bottom = 16.dp)
+            )
         }
     }
 }

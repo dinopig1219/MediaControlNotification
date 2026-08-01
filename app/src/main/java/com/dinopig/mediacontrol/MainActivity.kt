@@ -99,6 +99,11 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.blur.textureBlur
 import android.content.ComponentName
+import top.yukonga.miuix.kmp.basic.NavigationRail
+import top.yukonga.miuix.kmp.basic.NavigationRailItem
+import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
+import androidx.compose.foundation.layout.Row
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 
 class MainActivity : ComponentActivity() {
     
@@ -178,32 +183,65 @@ private fun openAutoStartSettings(context: Context) {
 private fun RootScreen() {
     val pagerState = rememberPagerState(pageCount = { 2 })
     val coroutineScope = rememberCoroutineScope()
+    
+    val railState = rememberNavigationRailState()
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
+
+    if (isTablet) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            NavigationRail(
+                state = railState
+            ) {
+                NavigationRailItem(
                     selected = pagerState.currentPage == 0,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                     icon = MiuixIcons.Home,
                     label = "主页"
                 )
-                NavigationBarItem(
+                NavigationRailItem(
                     selected = pagerState.currentPage == 1,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
                     icon = MiuixIcons.Demibold.Info,
                     label = "关于"
                 )
             }
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                if (page == 0) HomePage() else AboutPage()
+            }
         }
-    ) { outerPadding ->
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = outerPadding.calculateBottomPadding())
-        ) { page ->
-            if (page == 0) HomePage() else AboutPage()
+    } else {
+        Scaffold(
+            bottomBar = {
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = pagerState.currentPage == 0,
+                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
+                        icon = MiuixIcons.Home,
+                        label = "主页"
+                    )
+                    NavigationBarItem(
+                        selected = pagerState.currentPage == 1,
+                        onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
+                        icon = MiuixIcons.Demibold.Info,
+                        label = "关于"
+                    )
+                }
+            }
+        ) { outerPadding ->
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = outerPadding.calculateBottomPadding())
+            ) { page ->
+                if (page == 0) HomePage() else AboutPage()
+            }
         }
     }
 }
@@ -211,8 +249,24 @@ private fun RootScreen() {
 @Composable
 private fun HomePage() {
     val scrollBehavior = MiuixScrollBehavior()
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
+
     Scaffold(
-        topBar = { TopAppBar(title = "媒体控制通知", scrollBehavior = scrollBehavior) }
+        topBar = { 
+            if (isTablet) {
+                SmallTopAppBar(
+                    title = "媒体控制通知",
+                    scrollBehavior = scrollBehavior
+                )
+            } else {
+                TopAppBar(
+                    title = "媒体控制通知",
+                    largeTitle = "媒体控制通知",
+                    scrollBehavior = scrollBehavior
+                )
+            }
+        }
     ) { padding ->
         HomeScreen(scrollBehavior, padding)
     }
@@ -226,6 +280,9 @@ private fun AboutPage() {
     val backdrop = rememberLayerBackdrop()
     val blurSupported = remember { isRuntimeShaderSupported() }
 
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
+
     val scrollProgress by remember {
         derivedStateOf {
             if (logoSpacerHeightPx <= 0) return@derivedStateOf 0f
@@ -235,7 +292,11 @@ private fun AboutPage() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MiuixTheme.colorScheme.surface)
+    ) {
         BgEffectBackground(
             dynamicBackground = true,
             modifier = Modifier
@@ -247,13 +308,22 @@ private fun AboutPage() {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {
-                TopAppBar(
-                    title = "关于",
-                    largeTitle = "",
-                    scrollBehavior = scrollBehavior,
-                    color = if (scrollProgress > 0.99f) MiuixTheme.colorScheme.surface else Color.Transparent,
-                    titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
-                )
+                if (isTablet) {
+                    SmallTopAppBar(
+                        title = "关于",
+                        scrollBehavior = scrollBehavior,
+                        color = if (scrollProgress > 0.99f) MiuixTheme.colorScheme.surface else Color.Transparent,
+                        titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
+                    )
+                } else {
+                    TopAppBar(
+                        title = "关于",
+                        largeTitle = "",
+                        scrollBehavior = scrollBehavior,
+                        color = if (scrollProgress > 0.99f) MiuixTheme.colorScheme.surface else Color.Transparent,
+                        titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
+                    )
+                }
             }
         ) { padding ->
             AboutScreen(

@@ -28,6 +28,7 @@ import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
 import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.SmallTitle
 import top.yukonga.miuix.kmp.basic.TopAppBar
+import top.yukonga.miuix.kmp.basic.SmallTopAppBar
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.preference.OverlayDropdownPreference
@@ -55,7 +56,7 @@ class OrderActivity : ComponentActivity() {
         setContent {
             MiuixTheme(
                 colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
-                ) {
+            ) {
                 Scaffold {
                     OrderScreen(onBack = { finish() })
                 }
@@ -73,6 +74,9 @@ private val SIDE2_LABELS = listOf("左", "右")
 private fun OrderScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
+
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val isTablet = configuration.screenWidthDp >= 600
 
     var custom1Index by remember {
         mutableIntStateOf(SLOT4_KEYS.indexOf(prefs.getString("expanded_custom1_slot", "RIGHT1")).coerceAtLeast(0))
@@ -94,16 +98,28 @@ private fun OrderScreen(onBack: () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = "自定义通知动作排序",
-                largeTitle = "自定义通知动作排序",
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+            if (isTablet) {
+                SmallTopAppBar(
+                    title = "自定义通知动作排序",
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+                        }
                     }
-                },
-                scrollBehavior = scrollBehavior
-            )
+                )
+            } else {
+                TopAppBar(
+                    title = "自定义通知动作排序",
+                    largeTitle = "自定义通知动作排序",
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+                        }
+                    }
+                )
+            }
         }
     ) { padding ->
         Column(
@@ -122,7 +138,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp),
+                        .padding(vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -260,6 +276,60 @@ private fun OrderScreen(onBack: () -> Unit) {
                             )
                         )
                     )
+                }
+            }
+
+            SmallTitle(text = "收起状态排序")
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val compactPreviewIcons = mutableListOf<Int>()
+
+                    if (compactModeIndex == 0) {
+                        compactPreviewIcons.add(R.drawable.ic_thin_previous)
+                        compactPreviewIcons.add(R.drawable.ic_thin_play)
+                        compactPreviewIcons.add(R.drawable.ic_thin_next)
+                    } else {
+                        val itemsWithSide = listOf(
+                            R.drawable.ic_custom_1 to compactSide1Index,
+                            R.drawable.ic_custom_2 to compactSide2Index
+                        ).sortedBy { it.second }
+
+                        itemsWithSide.forEach { (icon, _) ->
+                            compactPreviewIcons.add(icon)
+                        }
+                    }
+
+                    compactPreviewIcons.forEach { iconResId ->
+                        val isCustom = iconResId == R.drawable.ic_custom_1 || iconResId == R.drawable.ic_custom_2
+                        
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .background(
+                                    color = MiuixTheme.colorScheme.surfaceVariant, 
+                                    shape = RoundedCornerShape(50)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(id = iconResId),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp), 
+                                colorFilter = ColorFilter.tint(
+                                    if (isCustom) 
+                                        MiuixTheme.colorScheme.primary 
+                                    else 
+                                        MiuixTheme.colorScheme.onSurface
+                                )
+                            )
+                        }
+                    }
                 }
             }
 

@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -66,14 +67,22 @@ class OrderActivity : ComponentActivity() {
 }
 
 private val SLOT4_KEYS = listOf("LEFT1", "LEFT2", "RIGHT1", "RIGHT2")
-private val SLOT4_LABELS = listOf("左 1", "左 2", "右 1", "右 2")
 private val SIDE2_KEYS = listOf("LEFT", "RIGHT")
-private val SIDE2_LABELS = listOf("左", "右")
 
 @Composable
 private fun OrderScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
+    val slot4Labels = listOf(
+        stringResource(R.string.order_slot_left1),
+        stringResource(R.string.order_slot_left2),
+        stringResource(R.string.order_slot_right1),
+        stringResource(R.string.order_slot_right2)
+    )
+    val side2Labels = listOf(
+        stringResource(R.string.order_side_left),
+        stringResource(R.string.order_side_right)
+    )
 
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isTablet = configuration.screenWidthDp >= 600
@@ -100,22 +109,22 @@ private fun OrderScreen(onBack: () -> Unit) {
         topBar = {
             if (isTablet) {
                 SmallTopAppBar(
-                    title = "自定义通知动作排序",
+                    title = stringResource(R.string.pref_notification_order_title),
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+                            Icon(imageVector = MiuixIcons.Back, contentDescription = stringResource(R.string.content_desc_back))
                         }
                     }
                 )
             } else {
                 TopAppBar(
-                    title = "自定义通知动作排序",
-                    largeTitle = "自定义通知动作排序",
+                    title = stringResource(R.string.pref_notification_order_title),
+                    largeTitle = stringResource(R.string.pref_notification_order_title),
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+                            Icon(imageVector = MiuixIcons.Back, contentDescription = stringResource(R.string.content_desc_back))
                         }
                     }
                 )
@@ -133,7 +142,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                     bottom = 16.dp
                 )
         ) {
-            SmallTitle(text = "展开状态排序")
+            SmallTitle(text = stringResource(R.string.order_expanded_state_title))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Row(
                     modifier = Modifier
@@ -188,17 +197,17 @@ private fun OrderScreen(onBack: () -> Unit) {
                 }
             }
             
-            SmallTitle(text = "展开通知")
+            SmallTitle(text = stringResource(R.string.order_expanded_notification_title))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     OverlayDropdownPreference(
-                        title = "自定义动作 1 位置",
+                        title = stringResource(R.string.order_custom_action1_position),
                         collapseOnSelection = true,
                         entries = listOf(
                             DropdownEntry(
                                 items = listOf(0, 1).map { index ->
                                     DropdownItem(
-                                        text = SLOT4_LABELS[index],
+                                        text = slot4Labels[index],
                                         selected = custom1Index == index,
                                         onClick = {
                                             val oldIndex = custom1Index
@@ -216,7 +225,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                             DropdownEntry(
                                 items = listOf(2, 3).map { index ->
                                     DropdownItem(
-                                        text = SLOT4_LABELS[index],
+                                        text = slot4Labels[index],
                                         selected = custom1Index == index,
                                         onClick = {
                                             val oldIndex = custom1Index
@@ -235,13 +244,13 @@ private fun OrderScreen(onBack: () -> Unit) {
                     )
                     
                     OverlayDropdownPreference(
-                        title = "自定义动作 2 位置",
+                        title = stringResource(R.string.order_custom_action2_position),
                         collapseOnSelection = true,
                         entries = listOf(
                             DropdownEntry(
                                 items = listOf(0, 1).map { index ->
                                     DropdownItem(
-                                        text = SLOT4_LABELS[index],
+                                        text = slot4Labels[index],
                                         selected = custom2Index == index,
                                         onClick = {
                                             val oldIndex = custom2Index
@@ -259,7 +268,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                             DropdownEntry(
                                 items = listOf(2, 3).map { index ->
                                     DropdownItem(
-                                        text = SLOT4_LABELS[index],
+                                        text = slot4Labels[index],
                                         selected = custom2Index == index,
                                         onClick = {
                                             val oldIndex = custom2Index
@@ -279,7 +288,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                 }
             }
 
-            SmallTitle(text = "收起状态排序")
+            SmallTitle(text = stringResource(R.string.order_compact_state_title))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Row(
                     modifier = Modifier
@@ -333,12 +342,12 @@ private fun OrderScreen(onBack: () -> Unit) {
                 }
             }
 
-            SmallTitle(text = "收起通知")
+            SmallTitle(text = stringResource(R.string.order_compact_notification_title))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     OverlayDropdownPreference(
-                        title = "显示动作",
-                        items = listOf("音乐控制动作", "自定义动作"),
+                        title = stringResource(R.string.order_display_actions_title),
+                        items = listOf(stringResource(R.string.order_display_actions_music), stringResource(R.string.order_display_actions_custom)),
                         selectedIndex = compactModeIndex,
                         onSelectedIndexChange = {
                             compactModeIndex = it
@@ -348,8 +357,8 @@ private fun OrderScreen(onBack: () -> Unit) {
 
                     if (compactModeIndex == 1) {
                         OverlayDropdownPreference(
-                            title = "自定义动作 1 位置",
-                            items = SIDE2_LABELS,
+                            title = stringResource(R.string.order_custom_action1_position),
+                            items = side2Labels,
                             selectedIndex = compactSide1Index,
                             onSelectedIndexChange = { newIndex ->
                                 val oldIndex = compactSide1Index
@@ -362,8 +371,8 @@ private fun OrderScreen(onBack: () -> Unit) {
                             }
                         )
                         OverlayDropdownPreference(
-                            title = "自定义动作 2 位置",
-                            items = SIDE2_LABELS,
+                            title = stringResource(R.string.order_custom_action2_position),
+                            items = side2Labels,
                             selectedIndex = compactSide2Index,
                             onSelectedIndexChange = { newIndex ->
                                 val oldIndex = compactSide2Index
@@ -379,7 +388,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                 }
             }
             Text(
-                text = "更改将会在音乐状态有变动时生效。",
+                text = stringResource(R.string.order_effect_notice),
                 style = MiuixTheme.textStyles.footnote1,
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 modifier = Modifier

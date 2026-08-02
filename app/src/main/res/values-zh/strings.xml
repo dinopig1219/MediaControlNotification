@@ -86,4 +86,7 @@
     <string name="notification_action_play">播放</string>
     <string name="notification_action_next">下一首</string>
     <string name="debug_notification_title">调试信息</string>
+    <string name="debug_text_updated_at">更新时间：</string>
+    <string name="debug_text_package_name">包名：</string>
+    <string name="debug_text_none">(无)</string>
 </resources>

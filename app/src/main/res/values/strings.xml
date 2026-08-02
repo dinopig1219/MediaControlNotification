@@ -86,7 +86,4 @@
     <string name="notification_action_play">Play</string>
     <string name="notification_action_next">Next</string>
     <string name="debug_notification_title">Debug info</string>
-    <string name="debug_text_updated_at">Updated at:</string>
-    <string name="debug_text_package_name">Package name:</string>
-    <string name="debug_text_none">(None)</string>
 </resources>

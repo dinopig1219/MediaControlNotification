@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">媒体控制通知</string>
+
+    <string name="nav_home">主页</string>
+    <string name="nav_about">关于</string>
+    <string name="content_desc_back">返回</string>
+
+    <string name="section_master_switch">总开关</string>
+    <string name="section_info">信息</string>
+    <string name="section_notification_settings">通知设置</string>
+    <string name="section_permission_settings">权限设置</string>
+    <string name="section_log">日志</string>
+    <string name="section_links">链接</string>
+
+    <string name="pref_enable_service_title">启用服务</string>
+    <string name="pref_enable_service_summary_need_perms">需要先同时开启通知权限和通知使用权才能启用</string>
+    <string name="pref_enable_service_summary_running">正在运行，Spotify 播放音乐时会生成通知</string>
+    <string name="pref_enable_service_summary_off">服务已关闭</string>
+
+    <string name="info_no_song">暂未获取到歌名</string>
+    <string name="info_no_artist">暂未获取到歌手</string>
+    <string name="info_no_data">暂未获取到信息</string>
+    <string name="info_package_title">播放器包名</string>
+    <string name="info_custom_action1_title">自定义动作 1</string>
+    <string name="info_custom_action2_title">自定义动作 2</string>
+
+    <string name="pref_notification_order_title">自定义动作排序</string>
+    <string name="pref_notification_order_summary">调整展开和收起通知里动作的位置</string>
+
+    <string name="pref_notification_permission_title">通知权限（必须）</string>
+    <string name="pref_notification_permission_ungranted">未授权，用于本 App 生成通知</string>
+
+    <string name="pref_listener_permission_title">通知使用权（必须）</string>
+    <string name="pref_listener_permission_ungranted">未授权，用于读取 Spotify 播放状态</string>
+
+    <string name="state_granted">已授权</string>
+
+    <string name="pref_autostart_title">自启动（可选）</string>
+    <string name="pref_autostart_summary">确保应用在后台可以持续运行</string>
+
+    <string name="pref_battery_title">省电策略（可选）</string>
+    <string name="pref_battery_summary">允许后台运行以保持服务更新</string>
+
+    <string name="pref_hide_recents_title">隐藏后台窗口</string>
+    <string name="pref_hide_recents_summary">切换到后台时自动从最近任务中隐藏</string>
+
+    <string name="pref_debug_notification_title">显示调试通知</string>
+    <string name="pref_debug_notification_summary">开启后本应用通知会多一条调试信息</string>
+
+    <string name="pref_view_debug_info_title">调试信息</string>
+
+    <string name="about_version_unknown">未知</string>
+    <string name="pref_view_source_title">查看源码</string>
+    <string name="pref_view_source_summary">项目主页与更新日志</string>
+    <string name="pref_check_update_title">检查更新</string>
+    <string name="pref_check_update_summary">检查软件版本更新和新功能</string>
+    <string name="label_github">GitHub</string>
+
+    <string name="order_expanded_state_title">展开状态排序</string>
+    <string name="order_expanded_notification_title">展开通知</string>
+    <string name="order_custom_action1_position">自定义动作 1 位置</string>
+    <string name="order_custom_action2_position">自定义动作 2 位置</string>
+    <string name="order_compact_state_title">收起状态排序</string>
+    <string name="order_compact_notification_title">收起通知</string>
+    <string name="order_display_actions_title">显示动作</string>
+    <string name="order_display_actions_music">音乐控制动作</string>
+    <string name="order_display_actions_custom">自定义动作</string>
+    <string name="order_slot_left1">左 1</string>
+    <string name="order_slot_left2">左 2</string>
+    <string name="order_slot_right1">右 1</string>
+    <string name="order_slot_right2">右 2</string>
+    <string name="order_side_left">左</string>
+    <string name="order_side_right">右</string>
+    <string name="order_effect_notice">更改将会在音乐状态有变动时生效。</string>
+
+    <string name="debug_title">调试信息</string>
+    <string name="section_now_playing">当前播放</string>
+    <string name="section_log_output">信息输出</string>
+    <string name="action_refresh">刷新</string>
+    <string name="debug_no_data">还没有数据。请先播放 Spotify，确保已授权通知使用权。</string>
+
+    <string name="notification_title_now_playing">正在播放</string>
+    <string name="notification_action_previous">上一首</string>
+    <string name="notification_action_pause">暂停</string>
+    <string name="notification_action_play">播放</string>
+    <string name="notification_action_next">下一首</string>
+    <string name="debug_notification_title">调试信息</string>
+</resources>

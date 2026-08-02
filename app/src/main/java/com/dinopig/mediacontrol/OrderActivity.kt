@@ -49,13 +49,27 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import android.app.Activity
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 class OrderActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val isDarkTheme = isSystemInDarkTheme()
+            val view = LocalView.current
+            
+            if (!view.isInEditMode) {
+                SideEffect {
+                    val window = (view.context as Activity).window
+                    WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !isDarkTheme
+                }
+            }
+
             MiuixTheme(
-                colors = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()
+                colors = if (isDarkTheme) darkColorScheme() else lightColorScheme()
             ) {
                 Scaffold {
                     OrderScreen(onBack = { finish() })

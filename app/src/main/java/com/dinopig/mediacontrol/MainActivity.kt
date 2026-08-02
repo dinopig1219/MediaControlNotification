@@ -375,8 +375,8 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
 
     val currentPackage by remember {
         derivedStateOf {
-            if (debugInfo.contains("包名: ")) {
-                debugInfo.substringAfter("包名: ").substringBefore("\n").trim()
+            if (debugInfo.contains("Package name: ")) {
+                debugInfo.substringAfter("Package name: ").substringBefore("\n").trim()
             } else {
                 defaultInfoText
             }

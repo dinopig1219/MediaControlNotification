@@ -221,17 +221,17 @@ class MediaControlListenerService : NotificationListenerService() {
     private fun buildDebugText(state: PlaybackStateCompat): String {
         val sb = StringBuilder()
         val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-        sb.append(getString(R.string.debug_text_updated_at, time)).append("\n\n")
-        sb.append(getString(R.string.debug_text_package_name, activePackageName)).append("\n")
-        sb.append(getString(R.string.debug_text_actions_bitmask, state.actions)).append("\n")
-        sb.append(getString(R.string.debug_text_custom_actions)).append("\n")
+        sb.append("更新时间: $time\n\n")
+        sb.append("包名: $activePackageName\n")
+        sb.append("actions bitmask: ${state.actions}\n")
+        sb.append("customActions:\n")
         if (state.customActions.isNullOrEmpty()) {
-            sb.append(getString(R.string.debug_text_none)).append("\n")
+            sb.append("  (无)\n")
         } else {
             state.customActions.forEach {
-                sb.append(getString(R.string.debug_text_action_name, it.name)).append("\n")
-                sb.append(getString(R.string.debug_text_action_value, it.action)).append("\n")
-                sb.append(getString(R.string.debug_text_icon_value, it.icon)).append("\n\n")
+                sb.append("  name=${it.name}\n")
+                sb.append("  action=${it.action}\n")
+                sb.append("  icon=${it.icon}\n\n")
             }
         }
         return sb.toString()

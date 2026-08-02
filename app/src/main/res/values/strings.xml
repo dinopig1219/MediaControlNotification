@@ -15,8 +15,8 @@
 
     <string name="pref_enable_service_title">Enable service</string>
     <string name="pref_enable_service_summary_need_perms">Grant required permissions to enable</string>
-    <string name="pref_enable_service_summary_running">Running — notification appears whenever Spotify plays music</string>
-    <string name="pref_enable_service_summary_off">Disabled - service is off</string>
+    <string name="pref_enable_service_summary_running">Running - notification appears whenever Spotify plays music</string>
+    <string name="pref_enable_service_summary_off">Disabled -    service is off</string>
 
     <string name="info_no_song">No song data yet</string>
     <string name="info_no_artist">No artist data yet</string>
@@ -86,12 +86,4 @@
     <string name="notification_action_play">Play</string>
     <string name="notification_action_next">Next</string>
     <string name="debug_notification_title">Debug info</string>
-    <string name="debug_text_updated_at">Updated at: %1$s</string>
-    <string name="debug_text_package_name">Package name: %1$s</string>
-    <string name="debug_text_actions_bitmask">Actions bitmask: %1$d</string>
-    <string name="debug_text_custom_actions">Custom actions:</string>
-    <string name="debug_text_none">  (None)</string>
-    <string name="debug_text_action_name">  name=%1$s</string>
-    <string name="debug_text_action_value">  action=%1$d</string>
-    <string name="debug_text_icon_value">  icon=%1$d</string>
 </resources>

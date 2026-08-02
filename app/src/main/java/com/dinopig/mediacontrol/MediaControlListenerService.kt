@@ -221,12 +221,12 @@ class MediaControlListenerService : NotificationListenerService() {
     private fun buildDebugText(state: PlaybackStateCompat): String {
         val sb = StringBuilder()
         val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
-        sb.append("更新时间: $time\n\n")
-        sb.append("包名: $activePackageName\n")
+        sb.append("Updated: $time\n\n")
+        sb.append("Package name: $activePackageName\n")
         sb.append("actions bitmask: ${state.actions}\n")
         sb.append("customActions:\n")
         if (state.customActions.isNullOrEmpty()) {
-            sb.append("  (无)\n")
+            sb.append("  (null)\n")
         } else {
             state.customActions.forEach {
                 sb.append("  name=${it.name}\n")

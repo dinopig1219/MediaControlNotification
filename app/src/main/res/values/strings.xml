@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Media Control</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_about">About</string>
+    <string name="content_desc_back">Back</string>
+
+    <string name="section_master_switch">Switch</string>
+    <string name="section_info">Info</string>
+    <string name="section_notification_settings">Notification Settings</string>
+    <string name="section_permission_settings">Permissions</string>
+    <string name="section_log">Log</string>
+    <string name="section_links">Links</string>
+
+    <string name="pref_enable_service_title">Enable Service</string>
+    <string name="pref_enable_service_summary_need_perms">Requires both Notification Access and Listener Access to enable</string>
+    <string name="pref_enable_service_summary_running">Running — notification appears whenever Spotify plays music</string>
+    <string name="pref_enable_service_summary_off">Service is off</string>
+
+    <string name="info_no_song">No song detected yet</string>
+    <string name="info_no_artist">No artist detected yet</string>
+    <string name="info_no_data">No data yet</string>
+    <string name="info_package_title">Player package name</string>
+    <string name="info_custom_action1_title">Custom action 1</string>
+    <string name="info_custom_action2_title">Custom action 2</string>
+
+    <string name="pref_notification_order_title">Custom Action Order</string>
+    <string name="pref_notification_order_summary">Adjust action positions in notification</string>
+
+    <string name="pref_notification_permission_title">Notification permission</string>
+    <string name="pref_notification_permission_ungranted">Not granted — used to show notifications</string>
+
+    <string name="pref_listener_permission_title">Listener access</string>
+    <string name="pref_listener_permission_ungranted">Not granted — used to read Spotify\'s playback status</string>
+
+    <string name="state_granted">Granted</string>
+
+    <string name="pref_autostart_title">Autorun (optional)</string>
+    <string name="pref_autostart_summary">To keep service running in the background</string>
+
+    <string name="pref_battery_title">Battery restrictions (optional)</string>
+    <string name="pref_battery_summary">To keep service updating status</string>
+
+    <string name="pref_hide_recents_title">Hide from recents</string>
+    <string name="pref_hide_recents_summary">Hide task from the recent tasks when backgrounded</string>
+
+    <string name="pref_debug_notification_title">Show debug notification</string>
+    <string name="pref_debug_notification_summary">When enabled, a debug notification will appear</string>
+
+    <string name="pref_view_debug_info_title">View debug info</string>
+
+    <string name="about_version_unknown">Unknown</string>
+    <string name="pref_view_source_title">Source code</string>
+    <string name="pref_view_source_summary">Project repository and changelog</string>
+    <string name="pref_check_update_title">Check for updates</string>
+    <string name="pref_check_update_summary">Check the app version update and new features</string>
+    <string name="label_github">GitHub</string>
+
+    <string name="debug_title">Debug Info</string>
+    <string name="section_now_playing">Now Playing</string>
+    <string name="section_log_output">Log Output</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="debug_no_data">No data yet. Play something on Spotify and make sure permissions is granted.</string>
+</resources>

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -111,27 +112,27 @@ private fun DebugScreen(onBack: () -> Unit) {
         topBar = {
             if (isTablet) {
                 SmallTopAppBar(
-                    title = "调试信息",
+                    title = stringResource(R.string.debug_title),
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = MiuixIcons.Back,
-                                contentDescription = "返回"
+                                contentDescription = stringResource(R.string.content_desc_back)
                             )
                         }
                     }
                 )
             } else {
                 TopAppBar(
-                    title = "调试信息",
-                    largeTitle = "调试信息",
+                    title = stringResource(R.string.debug_title),
+                    largeTitle = stringResource(R.string.debug_title),
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(
                                 imageVector = MiuixIcons.Back,
-                                contentDescription = "返回"
+                                contentDescription = stringResource(R.string.content_desc_back)
                             )
                         }
                     }
@@ -149,7 +150,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                 .padding(bottom = padding.calculateBottomPadding())
         ) {
             
-            SmallTitle(text = "当前播放")
+            SmallTitle(text = stringResource(R.string.section_now_playing))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 BasicComponent(
                     title = debugData.song,
@@ -158,7 +159,7 @@ private fun DebugScreen(onBack: () -> Unit) {
             }
 
             Box(modifier = Modifier.fillMaxWidth()) {
-                SmallTitle(text = "信息输出")
+                SmallTitle(text = stringResource(R.string.section_log_output))
 
                 Box(
                     modifier = Modifier
@@ -169,7 +170,7 @@ private fun DebugScreen(onBack: () -> Unit) {
                         InfiniteProgressIndicator(modifier = Modifier.size(20.dp))
                     } else {
                         Text(
-                            text = "刷新",
+                            text = stringResource(R.string.action_refresh),
                             style = MiuixTheme.textStyles.subtitle,
                             color = MiuixTheme.colorScheme.primary,
                             modifier = Modifier.clickable(
@@ -203,9 +204,12 @@ private fun DebugScreen(onBack: () -> Unit) {
 
 private fun loadDebugInfo(context: Context): DebugData {
     val prefs = context.getSharedPreferences("debug_info", Context.MODE_PRIVATE)
-    val info = prefs.getString("last_debug_info", null) ?: "还没有数据。请先播放 Spotify，确保已授权通知使用权。"
-    val song = prefs.getString("current_song", "暂未获取到歌名") ?: "暂未获取到歌名"
-    val artist = prefs.getString("current_artist", "暂未获取到歌手") ?: "歌手"
-    
+    val defaultNoData = context.getString(R.string.debug_no_data)
+    val defaultSong = context.getString(R.string.info_no_song)
+    val defaultArtist = context.getString(R.string.info_no_artist)
+    val info = prefs.getString("last_debug_info", null) ?: defaultNoData
+    val song = prefs.getString("current_song", defaultSong) ?: defaultSong
+    val artist = prefs.getString("current_artist", defaultArtist) ?: defaultArtist
+
     return DebugData(logInfo = info, song = song, artist = artist)
 }

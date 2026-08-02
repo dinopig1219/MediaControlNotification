@@ -104,6 +104,7 @@ import top.yukonga.miuix.kmp.basic.NavigationRailItem
 import top.yukonga.miuix.kmp.basic.rememberNavigationRailState
 import androidx.compose.foundation.layout.Row
 import top.yukonga.miuix.kmp.basic.SmallTopAppBar
+import androidx.compose.ui.res.stringResource
 
 class MainActivity : ComponentActivity() {
     
@@ -198,13 +199,13 @@ private fun RootScreen() {
                     selected = pagerState.currentPage == 0,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                     icon = MiuixIcons.Home,
-                    label = "主页"
+                    label = stringResource(R.string.nav_home)
                 )
                 NavigationRailItem(
                     selected = pagerState.currentPage == 1,
                     onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
                     icon = MiuixIcons.Demibold.Info,
-                    label = "关于"
+                    label = stringResource(R.string.nav_about)
                 )
             }
 
@@ -223,13 +224,13 @@ private fun RootScreen() {
                         selected = pagerState.currentPage == 0,
                         onClick = { coroutineScope.launch { pagerState.animateScrollToPage(0) } },
                         icon = MiuixIcons.Home,
-                        label = "主页"
+                        label = stringResource(R.string.nav_home)
                     )
                     NavigationBarItem(
                         selected = pagerState.currentPage == 1,
                         onClick = { coroutineScope.launch { pagerState.animateScrollToPage(1) } },
                         icon = MiuixIcons.Demibold.Info,
-                        label = "关于"
+                        label = stringResource(R.string.nav_about)
                     )
                 }
             }
@@ -256,13 +257,13 @@ private fun HomePage() {
         topBar = { 
             if (isTablet) {
                 SmallTopAppBar(
-                    title = "媒体控制通知",
+                    title = stringResource(R.string.app_name),
                     scrollBehavior = scrollBehavior
                 )
             } else {
                 TopAppBar(
-                    title = "媒体控制通知",
-                    largeTitle = "媒体控制通知",
+                    title = stringResource(R.string.app_name),
+                    largeTitle = stringResource(R.string.app_name),
                     scrollBehavior = scrollBehavior
                 )
             }
@@ -310,14 +311,14 @@ private fun AboutPage() {
             topBar = {
                 if (isTablet) {
                     SmallTopAppBar(
-                        title = "关于",
+                        title = stringResource(R.string.nav_about),
                         scrollBehavior = scrollBehavior,
                         color = if (scrollProgress > 0.99f) MiuixTheme.colorScheme.surface else Color.Transparent,
                         titleColor = MiuixTheme.colorScheme.onSurface.copy(alpha = scrollProgress)
                     )
                 } else {
                     TopAppBar(
-                        title = "关于",
+                        title = stringResource(R.string.nav_about),
                         largeTitle = "",
                         scrollBehavior = scrollBehavior,
                         color = if (scrollProgress > 0.99f) MiuixTheme.colorScheme.surface else Color.Transparent,
@@ -344,6 +345,9 @@ private fun AboutPage() {
 private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
+    val defaultSongText = stringResource(R.string.info_no_song)
+    val defaultArtistText = stringResource(R.string.info_no_artist)
+    val defaultInfoText = stringResource(R.string.info_no_data)
 
     var notificationGranted by remember { mutableStateOf(isNotificationPermissionGranted(context)) }
     var listenerEnabled by remember { mutableStateOf(isNotificationListenerEnabled(context)) }
@@ -365,8 +369,8 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
         mutableStateOf(prefs.getBoolean("hide_recents_enabled", false))
     }
 
-    var currentSong by remember { mutableStateOf(prefs.getString("current_song", "暂未获取到歌名") ?: "暂未获取到歌名") }
-    var currentArtist by remember { mutableStateOf(prefs.getString("current_artist", "暂未获取到歌手") ?: "暂未获取到歌手") }
+    var currentSong by remember { mutableStateOf(prefs.getString("current_song", defaultSongText) ?: defaultSongText) }
+    var currentArtist by remember { mutableStateOf(prefs.getString("current_artist", defaultArtistText) ?: defaultArtistText) }
     var debugInfo by remember { mutableStateOf(prefs.getString("last_debug_info", "") ?: "") }
 
     val currentPackage by remember {
@@ -374,7 +378,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
             if (debugInfo.contains("包名: ")) {
                 debugInfo.substringAfter("包名: ").substringBefore("\n").trim()
             } else {
-                "暂未获取到信息"
+                defaultInfoText
             }
         }
     }
@@ -383,7 +387,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
         derivedStateOf {
             if (debugInfo.contains("name=")) {
                 debugInfo.substringAfter("name=").substringBefore("\n").trim()
-            } else "暂未获取到信息"
+            } else defaultInfoText
         }
     }
 
@@ -394,15 +398,15 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                 val afterFirst = debugInfo.substring(firstIndex + 5)
                 if (afterFirst.contains("name=")) {
                     afterFirst.substringAfter("name=").substringBefore("\n").trim()
-                } else "暂未获取到信息"
-            } else "暂未获取到信息"
+                } else defaultInfoText
+            } else defaultInfoText
         }
     }
 
     DisposableEffect(Unit) {
         val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-            if (key == "current_song") currentSong = sharedPreferences.getString("current_song", "暂未获取到歌名") ?: "暂未获取到歌名"
-            if (key == "current_artist") currentArtist = sharedPreferences.getString("current_artist", "暂未获取到歌手") ?: "暂未获取到歌手"
+            if (key == "current_song") currentSong = sharedPreferences.getString("current_song", defaultSongText) ?: defaultSongText
+            if (key == "current_artist") currentArtist = sharedPreferences.getString("current_artist", defaultArtistText) ?: defaultArtistText
             if (key == "last_debug_info") debugInfo = sharedPreferences.getString("last_debug_info", "") ?: ""
         }
         prefs.registerOnSharedPreferenceChangeListener(listener)
@@ -441,14 +445,14 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                 .nestedScroll(scrollBehavior.nestedScrollConnection)
                 .verticalScroll(scrollState),
         ) {
-            SmallTitle(text = "总开关")
+            SmallTitle(text = stringResource(R.string.section_master_switch))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 SwitchPreference(
-                    title = "启用服务",
+                    title = stringResource(R.string.pref_enable_service_title),
                     summary = when {
-                        !notificationGranted || !listenerEnabled -> "需要先同时开启通知权限和通知使用权才能启用"
-                        masterEnabled -> "正在运行，Spotify 播放音乐时会生成通知"
-                        else -> "服务已关闭"
+                        !notificationGranted || !listenerEnabled -> stringResource(R.string.pref_enable_service_summary_need_perms)
+                        masterEnabled -> stringResource(R.string.pref_enable_service_summary_running)
+                        else -> stringResource(R.string.pref_enable_service_summary_off)
                     },
                     checked = masterEnabled,
                     onCheckedChange = { checked ->
@@ -474,7 +478,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
             }
 
             if (masterEnabled) {
-                SmallTitle(text = "信息")
+                SmallTitle(text = stringResource(R.string.section_info))
                 Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                     Column {
                         BasicComponent(
@@ -482,36 +486,36 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                             summary = currentArtist
                         )
                         BasicComponent(
-                            title = "播放器包名",
+                            title = stringResource(R.string.info_package_title),
                             summary = currentPackage
                         )
                         BasicComponent(
-                            title = "自定义动作 1 ",
+                            title = stringResource(R.string.info_custom_action1_title),
                             summary = customAction1
                         )
                         BasicComponent(
-                            title = "自定义动作 2 ",
+                            title = stringResource(R.string.info_custom_action2_title),
                             summary = customAction2
                         )
                     }
                 }
             }
 
-            SmallTitle(text = "通知设置")
+            SmallTitle(text = stringResource(R.string.section_notification_settings))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 ArrowPreference(
-                    title = "自定义通知动作排序",
-                    summary = "调整展开和收起通知里动作的位置",
+                    title = stringResource(R.string.pref_notification_order_title),
+                    summary = stringResource(R.string.pref_notification_order_summary),
                     onClick = { context.startActivity(Intent(context, OrderActivity::class.java)) }
                 )
             }
 
-            SmallTitle(text = "权限设置")
+            SmallTitle(text = stringResource(R.string.section_permission_settings))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     SwitchPreference(
-                        title = "通知权限",
-                        summary = if (notificationGranted) "已授权" else "未授权，用于本 App 生成通知",
+                        title = stringResource(R.string.pref_notification_permission_title),
+                        summary = if (notificationGranted) stringResource(R.string.state_granted) else stringResource(R.string.pref_notification_permission_ungranted),
                         checked = notificationGranted,
                         onCheckedChange = {
                             if (!notificationAskedBefore) {
@@ -529,8 +533,8 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                     )
 
                     SwitchPreference(
-                        title = "通知使用权",
-                        summary = if (listenerEnabled) "已授权" else "未授权，用于读取 Spotify 播放状态",
+                        title = stringResource(R.string.pref_listener_permission_title),
+                        summary = if (listenerEnabled) stringResource(R.string.state_granted) else stringResource(R.string.pref_listener_permission_ungranted),
                         checked = listenerEnabled,
                         onCheckedChange = {
                             context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
@@ -538,20 +542,20 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                     )
 
                     ArrowPreference(
-                        title = "自启动（可选）",
-                        summary = "确保应用在后台可以持续运行",
+                        title = stringResource(R.string.pref_autostart_title),
+                        summary = stringResource(R.string.pref_autostart_summary),
                         onClick = { openAutoStartSettings(context) }
                     )
 
                     ArrowPreference(
-                        title = "省电策略（可选）",
-                        summary = "允许后台运行以保持服务更新",
+                        title = stringResource(R.string.pref_battery_title),
+                        summary = stringResource(R.string.pref_battery_summary),
                         onClick = { openBatteryOptimizationSettings(context) }
                     )
 
                     SwitchPreference(
-                        title = "隐藏后台窗口",
-                        summary = "切换到后台时自动从最近任务中隐藏",
+                        title = stringResource(R.string.pref_hide_recents_title),
+                        summary = stringResource(R.string.pref_hide_recents_summary),
                         checked = hideRecentsEnabled,
                         onCheckedChange = { checked ->
                             hideRecentsEnabled = checked
@@ -561,12 +565,12 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                 }
             }
 
-            SmallTitle(text = "日志")
+            SmallTitle(text = stringResource(R.string.section_log))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     SwitchPreference(
-                        title = "显示调试通知",
-                        summary = "开启后本应用通知会多一条调试信息",
+                        title = stringResource(R.string.pref_debug_notification_title),
+                        summary = stringResource(R.string.pref_debug_notification_summary),
                         checked = debugNotificationsOn,
                         onCheckedChange = { checked ->
                             debugNotificationsOn = checked
@@ -575,7 +579,7 @@ private fun HomeScreen(scrollBehavior: ScrollBehavior, padding: PaddingValues) {
                     )
 
                     ArrowPreference(
-                        title = "查看调试信息",
+                        title = stringResource(R.string.pref_view_debug_info_title),
                         onClick = { context.startActivity(Intent(context, DebugActivity::class.java)) }
                     )
                 }
@@ -607,7 +611,7 @@ private fun AboutScreen(
     val packageInfo = remember {
         context.packageManager.getPackageInfo(context.packageName, 0)
     }
-    val versionName = packageInfo.versionName ?: "未知"
+    val versionName = packageInfo.versionName ?: stringResource(R.string.about_version_unknown)
     val versionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
 
     val density = LocalDensity.current
@@ -658,7 +662,7 @@ private fun AboutScreen(
         }
 
         Text(
-            text = "媒体控制通知",
+            text = stringResource(R.string.app_name),
             style = MiuixTheme.textStyles.title1,
             fontWeight = FontWeight.Bold,
             fontSize = 35.sp,
@@ -728,15 +732,15 @@ private fun AboutScreen(
                         .fillParentMaxHeight()
                         .padding(bottom = 16.dp)
                 ) {
-                    SmallTitle(text = "链接")
+                    SmallTitle(text = stringResource(R.string.section_links))
                     Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                         Column {
                             ArrowPreference(
-                                title = "查看源码",
-                                summary = "项目主页与更新日志",
+                                title = stringResource(R.string.pref_view_source_title),
+                                summary = stringResource(R.string.pref_view_source_summary),
                                 endActions = {
                                     Text(
-                                        text = "GitHub",
+                                        text = stringResource(R.string.label_github),
                                         color = MiuixTheme.colorScheme.onSurfaceVariantActions
                                     )
                                 },
@@ -746,8 +750,8 @@ private fun AboutScreen(
                             )
                             
                             ArrowPreference(
-                                title = "检查更新",
-                                summary = "检查软件版本更新和新功能",
+                                title = stringResource(R.string.pref_check_update_title),
+                                summary = stringResource(R.string.pref_check_update_summary),
                                 onClick = {
                                     uriHandler.openUri("https://github.com/dinopig1219/MediaControlNotification/releases")
                                 }

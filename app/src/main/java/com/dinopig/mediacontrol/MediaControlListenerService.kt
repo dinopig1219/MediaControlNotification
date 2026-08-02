@@ -144,7 +144,7 @@ class MediaControlListenerService : NotificationListenerService() {
             .setContentText(metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "")
             .setOngoing(isPlaying)
             .setOnlyAlertOnce(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setCategory(NotificationCompat.CATEGORY_TRANSPORT)
 
         metadata?.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)?.let { builder.setLargeIcon(it) }
@@ -248,7 +248,7 @@ class MediaControlListenerService : NotificationListenerService() {
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setContentTitle("调试信息")
             .setStyle(NotificationCompat.BigTextStyle().bigText(buildDebugText(state)))
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setOnlyAlertOnce(true)
 
         getSystemService(NotificationManager::class.java).notify(DEBUG_NOTIFICATION_ID, debugBuilder.build())
@@ -289,7 +289,7 @@ class MediaControlListenerService : NotificationListenerService() {
 
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CHANNEL_ID, "媒体控制通知", NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel(CHANNEL_ID, "媒体控制通知", NotificationManager.IMPORTANCE_DEFAULT)
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
     }

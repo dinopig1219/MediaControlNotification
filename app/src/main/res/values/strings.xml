@@ -13,26 +13,26 @@
     <string name="section_log">Log</string>
     <string name="section_links">Links</string>
 
-    <string name="pref_enable_service_title">Enable Service</string>
-    <string name="pref_enable_service_summary_need_perms">Requires both Notification Access and Listener Access to enable</string>
+    <string name="pref_enable_service_title">Enable service</string>
+    <string name="pref_enable_service_summary_need_perms">Grant required permissions to enable</string>
     <string name="pref_enable_service_summary_running">Running — notification appears whenever Spotify plays music</string>
-    <string name="pref_enable_service_summary_off">Service is off</string>
+    <string name="pref_enable_service_summary_off">Disabled - service is off</string>
 
-    <string name="info_no_song">No song detected yet</string>
-    <string name="info_no_artist">No artist detected yet</string>
+    <string name="info_no_song">No song data yet</string>
+    <string name="info_no_artist">No artist data yet</string>
     <string name="info_no_data">No data yet</string>
     <string name="info_package_title">Player package name</string>
     <string name="info_custom_action1_title">Custom action 1</string>
     <string name="info_custom_action2_title">Custom action 2</string>
 
-    <string name="pref_notification_order_title">Custom Action Order</string>
+    <string name="pref_notification_order_title">Custom action order</string>
     <string name="pref_notification_order_summary">Adjust action positions in notification</string>
 
-    <string name="pref_notification_permission_title">Notification permission</string>
-    <string name="pref_notification_permission_ungranted">Not granted — used to show notifications</string>
+    <string name="pref_notification_permission_title">Notification permission (required)</string>
+    <string name="pref_notification_permission_ungranted">Not granted — to show notifications</string>
 
-    <string name="pref_listener_permission_title">Listener access</string>
-    <string name="pref_listener_permission_ungranted">Not granted — used to read Spotify\'s playback status</string>
+    <string name="pref_listener_permission_title">Listener access (required)</string>
+    <string name="pref_listener_permission_ungranted">Not granted — to read Spotify playback status</string>
 
     <string name="state_granted">Granted</string>
 
@@ -46,9 +46,9 @@
     <string name="pref_hide_recents_summary">Hide task from the recent tasks when backgrounded</string>
 
     <string name="pref_debug_notification_title">Show debug notification</string>
-    <string name="pref_debug_notification_summary">When enabled, a debug notification will appear</string>
+    <string name="pref_debug_notification_summary">Debug notification will appear when enabled</string>
 
-    <string name="pref_view_debug_info_title">View debug info</string>
+    <string name="pref_view_debug_info_title">Debug info</string>
 
     <string name="about_version_unknown">Unknown</string>
     <string name="pref_view_source_title">Source code</string>
@@ -57,9 +57,35 @@
     <string name="pref_check_update_summary">Check the app version update and new features</string>
     <string name="label_github">GitHub</string>
 
+    <string name="order_expanded_state_title">Expanded state order</string>
+    <string name="order_expanded_notification_title">Expanded notification</string>
+    <string name="order_custom_action1_position">Custom action 1 position</string>
+    <string name="order_custom_action2_position">Custom action 2 position</string>
+    <string name="order_compact_state_title">Collapsed state order</string>
+    <string name="order_compact_notification_title">Collapsed notification</string>
+    <string name="order_display_actions_title">Display actions</string>
+    <string name="order_display_actions_music">Music control actions</string>
+    <string name="order_display_actions_custom">Custom actions</string>
+    <string name="order_effect_notice">Changes will take effect when the music status changes.</string>
+
     <string name="debug_title">Debug Info</string>
     <string name="section_now_playing">Now Playing</string>
     <string name="section_log_output">Log Output</string>
     <string name="action_refresh">Refresh</string>
     <string name="debug_no_data">No data yet. Play something on Spotify and make sure permissions is granted.</string>
+
+    <string name="notification_title_now_playing">Now playing</string>
+    <string name="notification_action_previous">Previous</string>
+    <string name="notification_action_pause">Pause</string>
+    <string name="notification_action_play">Play</string>
+    <string name="notification_action_next">Next</string>
+    <string name="debug_notification_title">Debug info</string>
+    <string name="debug_text_updated_at">Updated at: %1$s</string>
+    <string name="debug_text_package_name">Package name: %1$s</string>
+    <string name="debug_text_actions_bitmask">Actions bitmask: %1$d</string>
+    <string name="debug_text_custom_actions">Custom actions:</string>
+    <string name="debug_text_none">  (None)</string>
+    <string name="debug_text_action_name">  name=%1$s</string>
+    <string name="debug_text_action_value">  action=%1$d</string>
+    <string name="debug_text_icon_value">  icon=%1$d</string>
 </resources>

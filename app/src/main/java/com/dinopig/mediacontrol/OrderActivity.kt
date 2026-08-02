@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.Icon
@@ -100,22 +101,22 @@ private fun OrderScreen(onBack: () -> Unit) {
         topBar = {
             if (isTablet) {
                 SmallTopAppBar(
-                    title = "自定义通知动作排序",
+                    title = stringResource(R.string.pref_notification_order_title),
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+                            Icon(imageVector = MiuixIcons.Back, contentDescription = stringResource(R.string.content_desc_back))
                         }
                     }
                 )
             } else {
                 TopAppBar(
-                    title = "自定义通知动作排序",
-                    largeTitle = "自定义通知动作排序",
+                    title = stringResource(R.string.pref_notification_order_title),
+                    largeTitle = stringResource(R.string.pref_notification_order_title),
                     scrollBehavior = scrollBehavior,
                     navigationIcon = {
                         IconButton(onClick = onBack) {
-                            Icon(imageVector = MiuixIcons.Back, contentDescription = "返回")
+                            Icon(imageVector = MiuixIcons.Back, contentDescription = stringResource(R.string.content_desc_back))
                         }
                     }
                 )
@@ -133,7 +134,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                     bottom = 16.dp
                 )
         ) {
-            SmallTitle(text = "展开状态排序")
+            SmallTitle(text = stringResource(R.string.order_expanded_state_title))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Row(
                     modifier = Modifier
@@ -188,7 +189,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                 }
             }
             
-            SmallTitle(text = "展开通知")
+            SmallTitle(text = stringResource(R.string.order_expanded_notification_title))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     OverlayDropdownPreference(
@@ -279,7 +280,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                 }
             }
 
-            SmallTitle(text = "收起状态排序")
+            SmallTitle(text = stringResource(R.string.order_compact_state_title))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Row(
                     modifier = Modifier
@@ -333,12 +334,12 @@ private fun OrderScreen(onBack: () -> Unit) {
                 }
             }
 
-            SmallTitle(text = "收起通知")
+            SmallTitle(text = stringResource(R.string.order_compact_notification_title))
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     OverlayDropdownPreference(
-                        title = "显示动作",
-                        items = listOf("音乐控制动作", "自定义动作"),
+                        title = stringResource(R.string.order_display_actions_title),
+                        items = listOf(stringResource(R.string.order_display_actions_music), stringResource(R.string.order_display_actions_custom)),
                         selectedIndex = compactModeIndex,
                         onSelectedIndexChange = {
                             compactModeIndex = it
@@ -348,7 +349,7 @@ private fun OrderScreen(onBack: () -> Unit) {
 
                     if (compactModeIndex == 1) {
                         OverlayDropdownPreference(
-                            title = "自定义动作 1 位置",
+                            title = stringResource(R.string.order_custom_action1_position),
                             items = SIDE2_LABELS,
                             selectedIndex = compactSide1Index,
                             onSelectedIndexChange = { newIndex ->
@@ -362,7 +363,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                             }
                         )
                         OverlayDropdownPreference(
-                            title = "自定义动作 2 位置",
+                            title = stringResource(R.string.order_custom_action2_position),
                             items = SIDE2_LABELS,
                             selectedIndex = compactSide2Index,
                             onSelectedIndexChange = { newIndex ->
@@ -379,7 +380,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                 }
             }
             Text(
-                text = "更改将会在音乐状态有变动时生效。",
+                text = stringResource(R.string.order_effect_notice),
                 style = MiuixTheme.textStyles.footnote1,
                 color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 modifier = Modifier

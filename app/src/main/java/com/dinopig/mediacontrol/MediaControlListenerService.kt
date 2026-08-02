@@ -88,11 +88,14 @@ class MediaControlListenerService : NotificationListenerService() {
         
         if (sbn?.packageName in TARGET_PACKAGES) {
             
+            val defaultNoData = getString(R.string.debug_no_data)
+            val defaultSong = getString(R.string.info_no_song)
+            val defaultArtist = getString(R.string.info_no_artist)
             getSharedPreferences("debug_info", Context.MODE_PRIVATE)
                 .edit()
-                .putString("current_song", "暂未获取到歌名")
-                .putString("current_artist", "暂未获取到歌手")
-                .putString("last_debug_info", "还没有数据。请先播放 Spotify，确保已授权通知使用权。")
+                .putString("current_song", defaultSong)
+                .putString("current_artist", defaultArtist)
+                .putString("last_debug_info", defaultNoData)
                 .apply()
                 
             cancelNotification()
@@ -140,7 +143,7 @@ class MediaControlListenerService : NotificationListenerService() {
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_media_play)
-            .setContentTitle(metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "正在播放")
+            .setContentTitle(metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: getString(R.string.notification_title_now_playing))
             .setContentText(metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "")
             .setOngoing(isPlaying)
             .setOnlyAlertOnce(true)
@@ -151,10 +154,10 @@ class MediaControlListenerService : NotificationListenerService() {
 
         val prefs = getSharedPreferences("debug_info", Context.MODE_PRIVATE)
 
-        val prevAction = standardAction(R.drawable.ic_thin_previous, "上一首", MediaActionReceiver.ACTION_SKIP_PREV)
-        val playPauseAction = if (isPlaying) standardAction(R.drawable.ic_thin_pause, "暂停", MediaActionReceiver.ACTION_PAUSE)
-            else standardAction(R.drawable.ic_thin_play, "播放", MediaActionReceiver.ACTION_PLAY)
-        val nextAction = standardAction(R.drawable.ic_thin_next, "下一首", MediaActionReceiver.ACTION_SKIP_NEXT)
+        val prevAction = standardAction(R.drawable.ic_thin_previous, getString(R.string.notification_action_previous), MediaActionReceiver.ACTION_SKIP_PREV)
+        val playPauseAction = if (isPlaying) standardAction(R.drawable.ic_thin_pause, getString(R.string.notification_action_pause), MediaActionReceiver.ACTION_PAUSE)
+            else standardAction(R.drawable.ic_thin_play, getString(R.string.notification_action_play), MediaActionReceiver.ACTION_PLAY)
+        val nextAction = standardAction(R.drawable.ic_thin_next, getString(R.string.notification_action_next), MediaActionReceiver.ACTION_SKIP_NEXT)
         val customActionsList = state.customActions?.mapIndexed { index, action -> customAction(action, index) } ?: emptyList()
         val custom1 = customActionsList.getOrNull(0)
         val custom2 = customActionsList.getOrNull(1)
@@ -217,23 +220,26 @@ class MediaControlListenerService : NotificationListenerService() {
 
     private fun buildDebugText(state: PlaybackStateCompat): String {
         val sb = StringBuilder()
-        sb.append("更新时间: ${java.text.SimpleDateFormat("HH:mm:ss").format(java.util.Date())}\n\n")
-        sb.append("包名: $activePackageName\n")
-        sb.append("actions bitmask: ${state.actions}\n")
-        sb.append("customActions:\n")
+        val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date())
+        sb.append(getString(R.string.debug_text_updated_at, time)).append("\n\n")
+        sb.append(getString(R.string.debug_text_package_name, activePackageName)).append("\n")
+        sb.append(getString(R.string.debug_text_actions_bitmask, state.actions)).append("\n")
+        sb.append(getString(R.string.debug_text_custom_actions)).append("\n")
         if (state.customActions.isNullOrEmpty()) {
-            sb.append("  (无)\n")
+            sb.append(getString(R.string.debug_text_none)).append("\n")
         } else {
             state.customActions.forEach {
-                sb.append("  name=${it.name}\n  action=${it.action}\n  icon=${it.icon}\n\n")
+                sb.append(getString(R.string.debug_text_action_name, it.name)).append("\n")
+                sb.append(getString(R.string.debug_text_action_value, it.action)).append("\n")
+                sb.append(getString(R.string.debug_text_icon_value, it.icon)).append("\n\n")
             }
         }
         return sb.toString()
     }
 
     private fun saveDebugInfo(state: PlaybackStateCompat, metadata: MediaMetadataCompat?) {
-    val title = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "暂未获取到歌名"
-    val artist = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "暂未获取到歌手"
+    val title = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: getString(R.string.info_no_song)
+    val artist = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: getString(R.string.info_no_artist)
     
     getSharedPreferences("debug_info", Context.MODE_PRIVATE)
         .edit()
@@ -246,7 +252,7 @@ class MediaControlListenerService : NotificationListenerService() {
     private fun showDebugNotification(state: PlaybackStateCompat) {
         val debugBuilder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("调试信息")
+            .setContentTitle(getString(R.string.debug_notification_title))
             .setStyle(NotificationCompat.BigTextStyle().bigText(buildDebugText(state)))
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOnlyAlertOnce(true)
@@ -289,7 +295,7 @@ class MediaControlListenerService : NotificationListenerService() {
 
     private fun createChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(CHANNEL_ID, "媒体控制通知", NotificationManager.IMPORTANCE_LOW)
+            val channel = NotificationChannel(CHANNEL_ID, getString(R.string.app_name), NotificationManager.IMPORTANCE_LOW)
             getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
     }

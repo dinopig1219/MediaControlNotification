@@ -28,10 +28,10 @@
     <string name="pref_notification_order_title">自定义动作排序</string>
     <string name="pref_notification_order_summary">调整展开和收起通知里动作的位置</string>
 
-    <string name="pref_notification_permission_title">通知权限</string>
+    <string name="pref_notification_permission_title">通知权限（必须）</string>
     <string name="pref_notification_permission_ungranted">未授权，用于本 App 生成通知</string>
 
-    <string name="pref_listener_permission_title">通知使用权</string>
+    <string name="pref_listener_permission_title">通知使用权（必须）</string>
     <string name="pref_listener_permission_ungranted">未授权，用于读取 Spotify 播放状态</string>
 
     <string name="state_granted">已授权</string>
@@ -48,7 +48,7 @@
     <string name="pref_debug_notification_title">显示调试通知</string>
     <string name="pref_debug_notification_summary">开启后本应用通知会多一条调试信息</string>
 
-    <string name="pref_view_debug_info_title">查看调试信息</string>
+    <string name="pref_view_debug_info_title">调试信息</string>
 
     <string name="about_version_unknown">未知</string>
     <string name="pref_view_source_title">查看源码</string>
@@ -57,9 +57,35 @@
     <string name="pref_check_update_summary">检查软件版本更新和新功能</string>
     <string name="label_github">GitHub</string>
 
+    <string name="order_expanded_state_title">展开状态排序</string>
+    <string name="order_expanded_notification_title">展开通知</string>
+    <string name="order_custom_action1_position">自定义动作 1 位置</string>
+    <string name="order_custom_action2_position">自定义动作 2 位置</string>
+    <string name="order_compact_state_title">收起状态排序</string>
+    <string name="order_compact_notification_title">收起通知</string>
+    <string name="order_display_actions_title">显示动作</string>
+    <string name="order_display_actions_music">音乐控制动作</string>
+    <string name="order_display_actions_custom">自定义动作</string>
+    <string name="order_effect_notice">更改将会在音乐状态有变动时生效。</string>
+
     <string name="debug_title">调试信息</string>
     <string name="section_now_playing">当前播放</string>
     <string name="section_log_output">信息输出</string>
     <string name="action_refresh">刷新</string>
     <string name="debug_no_data">还没有数据。请先播放 Spotify，确保已授权通知使用权。</string>
+
+    <string name="notification_title_now_playing">正在播放</string>
+    <string name="notification_action_previous">上一首</string>
+    <string name="notification_action_pause">暂停</string>
+    <string name="notification_action_play">播放</string>
+    <string name="notification_action_next">下一首</string>
+    <string name="debug_notification_title">调试信息</string>
+    <string name="debug_text_updated_at">更新时间: %1$s</string>
+    <string name="debug_text_package_name">包名: %1$s</string>
+    <string name="debug_text_actions_bitmask">Actions bitmask: %1$d</string>
+    <string name="debug_text_custom_actions">Custom actions:</string>
+    <string name="debug_text_none">  (无)</string>
+    <string name="debug_text_action_name">  name=%1$s</string>
+    <string name="debug_text_action_value">  action=%1$d</string>
+    <string name="debug_text_icon_value">  icon=%1$d</string>
 </resources>

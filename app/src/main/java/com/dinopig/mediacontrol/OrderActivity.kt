@@ -67,14 +67,22 @@ class OrderActivity : ComponentActivity() {
 }
 
 private val SLOT4_KEYS = listOf("LEFT1", "LEFT2", "RIGHT1", "RIGHT2")
-private val SLOT4_LABELS = listOf("左 1", "左 2", "右 1", "右 2")
 private val SIDE2_KEYS = listOf("LEFT", "RIGHT")
-private val SIDE2_LABELS = listOf("左", "右")
 
 @Composable
 private fun OrderScreen(onBack: () -> Unit) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("debug_info", Context.MODE_PRIVATE) }
+    val slot4Labels = listOf(
+        stringResource(R.string.order_slot_left1),
+        stringResource(R.string.order_slot_left2),
+        stringResource(R.string.order_slot_right1),
+        stringResource(R.string.order_slot_right2)
+    )
+    val side2Labels = listOf(
+        stringResource(R.string.order_side_left),
+        stringResource(R.string.order_side_right)
+    )
 
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val isTablet = configuration.screenWidthDp >= 600
@@ -193,13 +201,13 @@ private fun OrderScreen(onBack: () -> Unit) {
             Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).padding(bottom = 12.dp)) {
                 Column {
                     OverlayDropdownPreference(
-                        title = "自定义动作 1 位置",
+                        title = stringResource(R.string.order_custom_action1_position),
                         collapseOnSelection = true,
                         entries = listOf(
                             DropdownEntry(
                                 items = listOf(0, 1).map { index ->
                                     DropdownItem(
-                                        text = SLOT4_LABELS[index],
+                                        text = slot4Labels[index],
                                         selected = custom1Index == index,
                                         onClick = {
                                             val oldIndex = custom1Index
@@ -217,7 +225,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                             DropdownEntry(
                                 items = listOf(2, 3).map { index ->
                                     DropdownItem(
-                                        text = SLOT4_LABELS[index],
+                                        text = slot4Labels[index],
                                         selected = custom1Index == index,
                                         onClick = {
                                             val oldIndex = custom1Index
@@ -236,13 +244,13 @@ private fun OrderScreen(onBack: () -> Unit) {
                     )
                     
                     OverlayDropdownPreference(
-                        title = "自定义动作 2 位置",
+                        title = stringResource(R.string.order_custom_action2_position),
                         collapseOnSelection = true,
                         entries = listOf(
                             DropdownEntry(
                                 items = listOf(0, 1).map { index ->
                                     DropdownItem(
-                                        text = SLOT4_LABELS[index],
+                                        text = slot4Labels[index],
                                         selected = custom2Index == index,
                                         onClick = {
                                             val oldIndex = custom2Index
@@ -260,7 +268,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                             DropdownEntry(
                                 items = listOf(2, 3).map { index ->
                                     DropdownItem(
-                                        text = SLOT4_LABELS[index],
+                                        text = slot4Labels[index],
                                         selected = custom2Index == index,
                                         onClick = {
                                             val oldIndex = custom2Index
@@ -350,7 +358,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                     if (compactModeIndex == 1) {
                         OverlayDropdownPreference(
                             title = stringResource(R.string.order_custom_action1_position),
-                            items = SIDE2_LABELS,
+                            items = side2Labels,
                             selectedIndex = compactSide1Index,
                             onSelectedIndexChange = { newIndex ->
                                 val oldIndex = compactSide1Index
@@ -364,7 +372,7 @@ private fun OrderScreen(onBack: () -> Unit) {
                         )
                         OverlayDropdownPreference(
                             title = stringResource(R.string.order_custom_action2_position),
-                            items = SIDE2_LABELS,
+                            items = side2Labels,
                             selectedIndex = compactSide2Index,
                             onSelectedIndexChange = { newIndex ->
                                 val oldIndex = compactSide2Index

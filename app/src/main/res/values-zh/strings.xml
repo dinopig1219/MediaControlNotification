@@ -66,6 +66,12 @@
     <string name="order_display_actions_title">显示动作</string>
     <string name="order_display_actions_music">音乐控制动作</string>
     <string name="order_display_actions_custom">自定义动作</string>
+    <string name="order_slot_left1">左 1</string>
+    <string name="order_slot_left2">左 2</string>
+    <string name="order_slot_right1">右 1</string>
+    <string name="order_slot_right2">右 2</string>
+    <string name="order_side_left">左</string>
+    <string name="order_side_right">右</string>
     <string name="order_effect_notice">更改将会在音乐状态有变动时生效。</string>
 
     <string name="debug_title">调试信息</string>

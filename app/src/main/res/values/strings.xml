@@ -29,10 +29,10 @@
     <string name="pref_notification_order_summary">Adjust action positions in notification</string>
 
     <string name="pref_notification_permission_title">Notification permission (required)</string>
-    <string name="pref_notification_permission_ungranted">Not granted — to show notifications</string>
+    <string name="pref_notification_permission_ungranted">Not granted - to show notifications</string>
 
     <string name="pref_listener_permission_title">Listener access (required)</string>
-    <string name="pref_listener_permission_ungranted">Not granted — to read Spotify playback status</string>
+    <string name="pref_listener_permission_ungranted">Not granted - to read Spotify playback status</string>
 
     <string name="state_granted">Granted</string>
 
@@ -66,6 +66,12 @@
     <string name="order_display_actions_title">Display actions</string>
     <string name="order_display_actions_music">Music control actions</string>
     <string name="order_display_actions_custom">Custom actions</string>
+    <string name="order_slot_left1">Left 1</string>
+    <string name="order_slot_left2">Left 2</string>
+    <string name="order_slot_right1">Right 1</string>
+    <string name="order_slot_right2">Right 2</string>
+    <string name="order_side_left">Left</string>
+    <string name="order_side_right">Right</string>
     <string name="order_effect_notice">Changes will take effect when the music status changes.</string>
 
     <string name="debug_title">Debug Info</string>
